@@ -44,5 +44,3 @@
 | ETL           | <img src="https://img.shields.io/badge/Lambda-FF9900?style=flat&logo=Awslambda&logoColor=white"/> <img src="https://img.shields.io/badge/Athena-232F3E?style=flat&logo=amazonAWS&logoColor=white"/> | 
 | ETL Scheduler | <img src="https://img.shields.io/badge/Airflow-017CEE?style=flat&logo=Apacheairflow&logoColor=white"/>                                                                                             | 
 
-
-# baekjoon-airflow
