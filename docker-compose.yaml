@@ -46,6 +46,7 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
+  # extension field
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.5.1}
   build: .
   environment:
@@ -77,7 +78,26 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
+
+
 services:
+
+  postgres_custom:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: hjyoo
+      POSTGRES_PASSWORD: hjyoo
+      POSGRES_DB: hjyoo
+      TZ: Asia/Seoul
+    volumes:
+      - postgres-custom-db-volume:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - 5433:5432
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.3
+
   postgres:
     image: postgres:13
     environment:
@@ -91,6 +111,11 @@ services:
       interval: 5s
       retries: 5
     restart: always
+    ports:
+      - 5431:5432
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.4
 
   redis:
     image: redis:latest
@@ -102,6 +127,9 @@ services:
       timeout: 30s
       retries: 50
     restart: always
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.5
 
   airflow-webserver:
     <<: *airflow-common
@@ -118,6 +146,9 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.6
 
   airflow-scheduler:
     <<: *airflow-common
@@ -132,6 +163,10 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.7
+
 
   airflow-worker:
     <<: *airflow-common
@@ -153,6 +188,10 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.8
+
 
   airflow-triggerer:
     <<: *airflow-common
@@ -167,6 +206,10 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.9
+
 
   airflow-init:
     <<: *airflow-common
@@ -245,6 +288,10 @@ services:
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
+    # networks:
+    #   network_custom:
+    #   ipv4_address: 172.28.0.10
+
 
   airflow-cli:
     <<: *airflow-common
@@ -280,5 +327,17 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+
 volumes:
   postgres-db-volume:
+  postgres-custom-db-volume:
+
+# networks:
+#   network_custom:
+#     driver : bridge
+#     ipam:
+#       driver : default
+#       config:
+#         - subnet: 172.28.0.0/16
+#         - gateway: 172.28.0.1
+

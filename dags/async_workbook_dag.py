@@ -81,8 +81,6 @@ with DAG(
     schedule_interval='@once',
 ) as dag:
     
-    # 
-    
     url = "https://www.acmicpc.net/workbook"
     flag = 'workbook'
 
@@ -90,27 +88,18 @@ with DAG(
     scraper_objects = scrape_workbook_user(url, start, end, flag)
     save_to_csv_task = save_to_csv(scraper_object=scraper_objects, flag=flag)
     
-    
-    s3_bucket_name = 'airflow-bucket-hajun'
+    s3_bucket_name = 'baekjoon-data'
     s3_folder = 'workbooks/'
     data_folder = os.path.join(os.getcwd(), "data")
     csv_file = os.path.join(data_folder, 'workbooks.csv')
     file_name = os.path.basename(csv_file)
     s3_key = os.path.join(s3_folder, file_name)
 
-    
-    s3_hook = S3Hook(aws_conn_id='hajun_aws_conn_id')
+    s3_hook = S3Hook(aws_conn_id='aws_default')
     upload_task = upload_local_file_to_s3(csv_file=csv_file, s3_key=s3_key, s3_bucket_name=s3_bucket_name, s3_hook=s3_hook) 
     
     upload_message_task = upload_message()
     
-    trigger_athena = TriggerDagRunOperator(
-        task_id="trigger_athena",
-        trigger_dag_id="workbook_athena_query",
-        reset_dag_run=True, # True일 경우 해당 날짜가 이미 실행되었더라도 다시 재실행
-        wait_for_completion=True # DAG bj_users_s3_upload_dag가 끝날 때까지 기다릴지 여부를 결정. 디폴트값은 False
-    )
-    
-    scraper_objects >> save_to_csv_task >> upload_task >> upload_message_task >> trigger_athena
+    scraper_objects >> save_to_csv_task >> upload_task >> upload_message_task
     
 

@@ -68,7 +68,7 @@ def upload_message()-> None:
 default_args = {
     'owner': 'airflow',
     'catchup': False,
-    'start_date': datetime(2023, 5, 20),
+    'start_date': datetime(2023, 9, 1),
     'retries': 1,
     'retry_delay': timedelta(minutes=3),
 }
@@ -80,12 +80,11 @@ with DAG(
     schedule_interval='@once',
 ) as dag:
     
-
     url = "https://www.acmicpc.net/ranklist/"
     start = 1
-    end = 1000
+    end = 1200
     
-    s3_bucket_name = 'airflow-bucket-hajun'
+    s3_bucket_name = 'baekjoon-data'
     s3_folder = 'users/'
     data_folder = os.path.join(os.getcwd(), "data")
     csv_file = os.path.join(data_folder, 'bj_users.csv')
@@ -95,18 +94,11 @@ with DAG(
     scraper_objects = scrape_user(url, start, end)
     save_to_csv_task = save_to_csv(scraper_objects)
     
-    s3_hook = S3Hook(aws_conn_id='hajun_aws_conn_id')
+    s3_hook = S3Hook(aws_conn_id='aws_default')
     upload_task = upload_local_file_to_s3(csv_file=csv_file, s3_key=s3_key, s3_bucket_name=s3_bucket_name, s3_hook=s3_hook) 
     
     upload_message_task = upload_message()
     
-    trigger_athena = TriggerDagRunOperator(
-        task_id="trigger_athena",
-        trigger_dag_id="user_athena_query",
-        reset_dag_run=True, # True일 경우 해당 날짜가 이미 실행되었더라도 다시 재실행
-        wait_for_completion=True # DAG bj_users_s3_upload_dag가 끝날 때까지 기다릴지 여부를 결정. 디폴트값은 False
-    )
-    
-    scraper_objects >> save_to_csv_task >> upload_task >> upload_message_task >> trigger_athena
+    scraper_objects >> save_to_csv_task >> upload_task >> upload_message_task
     
     

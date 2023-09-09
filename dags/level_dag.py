@@ -3,11 +3,10 @@ from airflow.operators.python import PythonOperator
 
 from airflow.decorators import task # decorator 임포트
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 from datetime import datetime, timedelta
 import os
 import csv
-import time
+
 
 @task
 def save_to_csv() -> None:
@@ -66,9 +65,9 @@ def save_to_csv() -> None:
 
 @task
 def upload_to_s3():
-    local_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/level.csv")
-    s3_hook = S3Hook(aws_conn_id='hajun_aws_conn_id') 
-    s3_bucket = 'airflow-bucket-hajun'
+    local_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/tier_detail.csv")
+    s3_hook = S3Hook(aws_conn_id='aws_default') 
+    s3_bucket = 'baekjoon-data'
     s3_key = 'tier_detail/tier_detail.csv'
     s3_hook.load_file(
         filename = local_file_path,
@@ -83,7 +82,7 @@ def upload_to_s3():
 default_args = {
     'owner': 'airflow',
     'catchup': False,
-    'start_date': datetime(2023, 5, 20),
+    'start_date': datetime(2023, 9, 1),
     'retries': 1,
     'retry_delay': timedelta(minutes=3),
 }
@@ -97,7 +96,6 @@ with DAG(
     
     save_to_csv_task = save_to_csv()
     
-    # upload_to_s3_task = upload_to_s3()
-    
-    save_to_csv_task 
+    upload_to_s3_task = upload_to_s3()
+    save_to_csv_task >> upload_to_s3_task
     
