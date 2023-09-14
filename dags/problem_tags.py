@@ -72,7 +72,7 @@ def collect_tags_and_save_to_csv(url:str) -> None:
 @task
 def upload_to_s3(aws_conn_id:str) -> None:
     s3_hook = S3Hook(aws_conn_id=aws_conn_id) # conn_id 입력
-    bucket_name = 'airflow-bucket-hajun' #bucket name 입력
+    bucket_name = 'baekjoon-data' #bucket name 입력
     local_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/problem_tag.csv")
     s3_key = 'problem_tag/problem_tag.csv'
     
@@ -101,8 +101,8 @@ with DAG('problem_tag_dag',
     ) as dag:
 
     url = "https://solved.ac/api/v3/search/tag"
-    aws_conn_id = 'hajun_aws_conn_id'
+    aws_conn_id = 'aws_default'
     collect_tags_task = collect_tags_and_save_to_csv(url=url)
-    # upload_task = upload_to_s3(aws_conn_id=aws_conn_id)
+    upload_task = upload_to_s3(aws_conn_id=aws_conn_id)
 
-    collect_tags_task 
+    collect_tags_task >> upload_task

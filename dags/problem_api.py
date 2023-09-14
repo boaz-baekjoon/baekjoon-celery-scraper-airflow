@@ -11,70 +11,80 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 
 # 리스트 만들기
-columns = ['problemId',
- 'titleKo',
- 'isSolvable',
- 'isPartial',
- 'acceptedUserCount',
- 'level',
- 'votedUserCount',
- 'sprout',
- 'givesNoRating',
- 'isLevelLocked',
- 'averageTries',
- 'official',
- 'tags']
+columns = [
+    'problemId',
+    'titleKo',
+    'isSolvable',
+    'isPartial',
+    'acceptedUserCount',
+    'level',
+    'votedUserCount',
+    'sprout',
+    'givesNoRating',
+    'isLevelLocked',
+    'averageTries',
+    'official',
+    'tags'
+    ]
 
-new_columns = ['problemId',
- 'titleKo',
- 'language',
- 'languageDisplayName',
- 'title',
- 'isOriginal',
- 'isSolvable',
- 'isPartial',
- 'acceptedUserCount',
- 'level',
- 'votedUserCount',
- 'sprout',
- 'givesNoRating',
- 'isLevelLocked',
- 'averageTries',
- 'official',
- 'tags']
+new_columns = [
+    'problemId',
+    'titleKo',
+    'language',
+    'languageDisplayName',
+    'title',
+    'isOriginal',
+    'isSolvable',
+    'isPartial',
+    'acceptedUserCount',
+    'level',
+    'votedUserCount',
+    'sprout',
+    'givesNoRating',
+    'isLevelLocked',
+    'averageTries',
+    'official',
+    'tags'
+    ]
 
-columns_naming = ['problem_id',
- 'problem_title',
- 'problem_lang',
- 'tag_display_lang',
- 'tag_name',
- 'problem_titles_isOriginal',
- 'problem_isSolvable',
- 'problem_isPartial',
- 'problem_answer_num',
- 'problem_level',
- 'problem_votedUserCount',
- 'problem_sprout',
- 'problem_givesNoRating',
- 'problem_isLevelLocked',
- 'problem_averageTries',
- 'problem_official',
- 'tag_key']
+columns_naming = [
+    'problem_id',
+    'problem_title',
+    'problem_lang',
+    'tag_display_lang',
+    'tag_name',
+    'problem_titles_isOriginal',
+    'problem_isSolvable',
+    'problem_isPartial',
+    'problem_answer_num',
+    'problem_level',
+    'problem_votedUserCount',
+    'problem_sprout',
+    'problem_givesNoRating',
+    'problem_isLevelLocked',
+    'problem_averageTries',
+    'problem_official',
+    'tag_key'
+    ]   
 
-def get_problem_id():
-    path = os.path.join(os.getcwd(),'data','problems.csv')
+
+def _get_problem_id():
+    path = os.path.join(os.getcwd(),'dags','data','problems.csv')
+    print(path)
     df = pd.read_csv(path)
     df['problem_id'] = df['problem_id'].astype(str)
-    problem_id = df['problem_id'].tolist()
-    return problem_id
+    problem_ids = df['problem_id'].tolist()
+    return problem_ids
 
-def get_page(problem_id):
+
+def _get_page(problem_id):
     url = 'https://solved.ac/api/v3/problem/lookup/?problemIds='
     ua_list = [
-            'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
-            ]   
+        'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
+    ]   
+    
     headers = {'User-Agent': random.choice(ua_list)}
 
     bet_url = '%2C'
@@ -84,20 +94,20 @@ def get_page(problem_id):
     logging.debug(res)
     return res.json()
 
-def tags_apply(x):
+def _tags_apply(x):
     result = []
     for i in x:
         result.append(i['key'])
     return result
 
-def titles_apply(x):
+def _titles_apply(x):
     return x[0]
 
-def transform(response_json):
+def _transform(response_json):
     df = pd.DataFrame(response_json)
-    df['titles'] = df['titles'].apply(titles_apply)
+    df['titles'] = df['titles'].apply(_titles_apply)
     df = pd.concat([df.drop('titles',axis=1),df['titles'].apply(pd.Series)],axis=1)
-    df['tags'] = df['tags'].apply(tags_apply)
+    df['tags'] = df['tags'].apply(_tags_apply)
     df = df[new_columns]
     df.columns = columns_naming
     df_ex = df.explode('tag_key')
@@ -110,24 +120,25 @@ def get_page_all():
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
         
-    csv_file = os.path.join(output_folder,'problem_detail.csv')
-    problem_id = get_problem_id()
-    for i in range(len(problem_id) // 100 + 1):
+    csv_file = os.path.join(output_folder, 'problem_detail.csv')
+    problem_ids = _get_problem_id()
+    for i in range(len(problem_ids) // 100 + 1):
         start = i * 100
         end = i * 100 + 99
-        res_json = get_page(problem_id[start:end])
-        df = transform(res_json)
+        res_json = _get_page(problem_ids[start:end])
+        df = _transform(res_json)
         if i == 0:
             df.to_csv(csv_file, encoding='utf-8', index=False)
         else:
             df.to_csv(csv_file, mode='a', header=False, index=False)
-            
+
+
 @task
 def upload_local_file_to_s3():
-    local_file_path = os.path.join(os.getcwd(),'data','problem_detail.csv')
-    s3_bucket_name = 'airflow-bucket-hajun'
+    local_file_path = os.path.join(os.getcwd(),'dags','data','problem_detail.csv')
+    s3_bucket_name = 'baekjoon-data'
     s3_file_key = 'problem_detail/problem_detail.csv'
-    s3_hook = S3Hook(aws_conn_id='hajun_aws_conn_id')
+    s3_hook = S3Hook(aws_conn_id='aws_default')
     s3_hook.load_file(
         filename=local_file_path,
         key=s3_file_key,
@@ -137,8 +148,8 @@ def upload_local_file_to_s3():
 
 
 with DAG(
-    dag_id = 'problem_csv_to_s3',
-    start_date = datetime(2023,6,23), # 날짜가 미래인 경우 실행이 안됨
+    dag_id = 'problem_detail_to_s3',
+    start_date = datetime(2023,9,1), # 날짜가 미래인 경우 실행이 안됨
     schedule = '@once',  # 적당히 조절
     catchup = False,
     max_active_runs = 1,
@@ -148,7 +159,9 @@ with DAG(
     }
     
 ) as dag :
+    
     paging = get_page_all()
-    # uploading = upload_local_file_to_s3()
-    paging 
+    uploading = upload_local_file_to_s3()
+    
+    paging >> uploading
 

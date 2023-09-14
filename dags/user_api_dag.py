@@ -33,7 +33,7 @@ def collect_data_and_save_to_csv(delay: float) -> None:
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     
-    csv_file = os.path.join(output_folder,'users_detail.csv')
+    csv_file = os.path.join(output_folder, 'users_detail.csv')
     print('start save into ', csv_file)
     start_time = time.time()
 
@@ -128,7 +128,7 @@ def collect_data_and_save_to_csv(delay: float) -> None:
 
 @task
 def upload_local_file_to_s3(aws_conn_id:str, s3_bucket_name:str) -> None:
-    local_file_path = os.path.join(os.getcwd(),'data','users_detail.csv')
+    local_file_path = os.path.join(os.getcwd(), 'dags', 'data', 'users_detail.csv')
     s3_file_key = 'users_detail/users_detail.csv'
     
     s3_hook = S3Hook(aws_conn_id=aws_conn_id)
@@ -141,7 +141,7 @@ def upload_local_file_to_s3(aws_conn_id:str, s3_bucket_name:str) -> None:
 
 with DAG(
     dag_id = 'solved_ac_user_api',
-    start_date = datetime(2023,7,4), 
+    start_date = datetime(2023,9,1), 
     schedule_interval = '@once',  
     catchup = False,
     max_active_runs = 1,
@@ -153,8 +153,8 @@ with DAG(
     requests_per_second = 300 / (15 * 60) 
     delay = 1 / requests_per_second
     
-    aws_conn_id = 'hajun_aws_conn_id'
-    s3_bucket_name = 'airflow-bucket-hajun'
+    aws_conn_id = 'aws_default'
+    s3_bucket_name = 'baekjoon-data'
 
     user_detail_data_collection_task = collect_data_and_save_to_csv(delay=delay)
     upload_task = upload_local_file_to_s3(aws_conn_id=aws_conn_id, s3_bucket_name=s3_bucket_name)

@@ -58,11 +58,13 @@ x-airflow-common:
     AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-    AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
+
+    AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
     
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- yfinance pandas numpy oauth2client gspread asyncio}
   volumes:
@@ -168,7 +170,7 @@ services:
     #   ipv4_address: 172.28.0.7
 
 
-  airflow-worker:
+  airflow-worker-1:
     <<: *airflow-common
     command: celery worker
     healthcheck:
@@ -191,6 +193,27 @@ services:
     # networks:
     #   network_custom:
     #   ipv4_address: 172.28.0.8
+
+  airflow-worker-2:
+    <<: *airflow-common
+    command: "celery worker && chmod 777 /var/run/docker.sock"
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    environment:
+      <<: *airflow-common-env
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
 
 
   airflow-triggerer:
@@ -312,8 +335,8 @@ services:
   flower:
     <<: *airflow-common
     command: celery flower
-    profiles:
-      - flower
+    # profiles:
+    #   - flower
     ports:
       - 5555:5555
     healthcheck:
