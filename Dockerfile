@@ -1,5 +1,5 @@
 # Start from the Airflow image
-FROM apache/airflow:2.5.1
+FROM apache/airflow:2.6.2
 
 # Change to the root user to install packages
 USER root

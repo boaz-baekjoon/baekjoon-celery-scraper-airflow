@@ -47,7 +47,7 @@ x-airflow-common:
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   # extension field
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.5.1}
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.2}
   build: .
   environment:
     &airflow-common-env
@@ -63,10 +63,11 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
-
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: 'false'
+    
     AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
     
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- yfinance pandas numpy oauth2client gspread asyncio}
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- yfinance pandas numpy oauth2client gspread asyncio apache-airflow-providers-amazon}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
@@ -81,24 +82,7 @@ x-airflow-common:
       condition: service_healthy
 
 
-
 services:
-
-  postgres_custom:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: hjyoo
-      POSTGRES_PASSWORD: hjyoo
-      POSGRES_DB: hjyoo
-      TZ: Asia/Seoul
-    volumes:
-      - postgres-custom-db-volume:/var/lib/postgresql/data
-    restart: always
-    ports:
-      - 5433:5432
-    # networks:
-    #   network_custom:
-    #   ipv4_address: 172.28.0.3
 
   postgres:
     image: postgres:13
@@ -305,8 +289,8 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
     volumes:
@@ -353,7 +337,6 @@ services:
 
 volumes:
   postgres-db-volume:
-  postgres-custom-db-volume:
 
 # networks:
 #   network_custom:
