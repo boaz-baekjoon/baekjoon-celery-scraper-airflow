@@ -42,6 +42,7 @@ def save_to_csv(scraper_objects:list) -> None:
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
+
     file_path = os.path.join(output_folder, "bj_users.csv")
     scraper.save_to_csv(objects=scraper_objects, file_name=file_path)
     print(file_path)
@@ -77,7 +78,7 @@ with DAG(
     'async_baekjoon_user_scraper',
     default_args=default_args,
     description='A async user scraper DAG',
-    schedule_interval='@once',
+    schedule_interval='0 1 * * 3',
 ) as dag:
     
     url = "https://www.acmicpc.net/ranklist/"
@@ -86,8 +87,11 @@ with DAG(
     
     s3_bucket_name = 'baekjoon-data'
     s3_folder = 'users/'
-    data_folder = os.path.join(os.getcwd(), "data")
-    csv_file = os.path.join(data_folder, 'bj_users.csv')
+    
+    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    
+    # data_folder = os.path.join(os.getcwd(), "data")
+    csv_file = os.path.join(data_dir, 'bj_users.csv')
     file_name = os.path.basename(csv_file)
     s3_key = os.path.join(s3_folder, file_name)
 

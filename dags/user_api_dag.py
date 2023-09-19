@@ -29,11 +29,9 @@ def collect_data_and_save_to_csv(delay: float) -> None:
     count = requests.get(url, headers=headers, params=querystring).json()['count']
     max_page = count // 50 + 1
     
-    output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR')
     
-    csv_file = os.path.join(output_folder, 'users_detail.csv')
+    csv_file = os.path.join(AIRFLOW_VAR_DATA_DIR, 'users_detail.csv')
     print('start save into ', csv_file)
     start_time = time.time()
 
@@ -128,7 +126,8 @@ def collect_data_and_save_to_csv(delay: float) -> None:
 
 @task
 def upload_local_file_to_s3(aws_conn_id:str, s3_bucket_name:str) -> None:
-    local_file_path = os.path.join(os.getcwd(), 'dags', 'data', 'users_detail.csv')
+    AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    local_file_path = os.path.join(AIRFLOW_VAR_DATA_DIR, 'users_detail.csv')
     s3_file_key = 'users_detail/users_detail.csv'
     
     s3_hook = S3Hook(aws_conn_id=aws_conn_id)
@@ -142,7 +141,7 @@ def upload_local_file_to_s3(aws_conn_id:str, s3_bucket_name:str) -> None:
 with DAG(
     dag_id = 'solved_ac_user_api',
     start_date = datetime(2023,9,1), 
-    schedule_interval = '@once',  
+    schedule_interval = '0 6 * * 3',  
     catchup = False,
     max_active_runs = 1,
     default_args = {

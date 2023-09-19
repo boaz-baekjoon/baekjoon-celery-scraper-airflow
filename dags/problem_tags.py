@@ -23,10 +23,7 @@ def collect_tags_and_save_to_csv(url:str) -> None:
             ]   
     headers = {'User-Agent': random.choice(ua_list)}
     
-    output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    output_folder = os.environ.get('AIRFLOW_VAR_DATA_DIR')
 
     file_path = os.path.join(output_folder, "problem_tag.csv")
 
@@ -73,7 +70,8 @@ def collect_tags_and_save_to_csv(url:str) -> None:
 def upload_to_s3(aws_conn_id:str) -> None:
     s3_hook = S3Hook(aws_conn_id=aws_conn_id) # conn_id 입력
     bucket_name = 'baekjoon-data' #bucket name 입력
-    local_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/problem_tag.csv")
+    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    local_file_path = os.path.join(data_dir, "problem_tag.csv")
     s3_key = 'problem_tag/problem_tag.csv'
     
     s3_hook.load_file(
@@ -88,7 +86,7 @@ def upload_to_s3(aws_conn_id:str) -> None:
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2023, 5, 20),
+    'start_date': datetime(2023, 9, 1),
     'catchup': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=3),
@@ -97,7 +95,7 @@ default_args = {
 
 with DAG('problem_tag_dag', 
         default_args=default_args, 
-        schedule_interval='@once'
+        schedule_interval='0 5 * * 3'
     ) as dag:
 
     url = "https://solved.ac/api/v3/search/tag"

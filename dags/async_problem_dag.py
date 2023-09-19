@@ -74,7 +74,7 @@ with DAG(
     dag_id='async_problem_scraper',
     default_args=default_args,
     description='A async problem_scraper DAG',
-    schedule_interval='@once',
+    schedule_interval='0 2 * * 3',
 ) as dag:
 
     url = "https://www.acmicpc.net/problemset/"
@@ -83,7 +83,7 @@ with DAG(
     
     s3_bucket_name = 'baekjoon-data'
     s3_folder = 'problems/'
-    data_folder = os.path.join(os.getcwd(), "data")
+    data_folder = os.environ.get('AIRFLOW_VAR_DATA_DIR')
     csv_file = os.path.join(data_folder, 'problems.csv')
     file_name = os.path.basename(csv_file)
     s3_key = os.path.join(s3_folder, file_name)

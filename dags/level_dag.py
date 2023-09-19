@@ -11,11 +11,12 @@ import csv
 @task
 def save_to_csv() -> None:
     
-    output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    # output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    # if not os.path.exists(output_folder):
+    #     os.makedirs(output_folder)
 
-    file_path = os.path.join(output_folder, "tier_detail.csv")
+    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    file_path = os.path.join(data_dir, "tier_detail.csv")
     
     csvfile = open(file_path, "w", newline="")
     csvwriter = csv.writer(csvfile)
@@ -65,7 +66,8 @@ def save_to_csv() -> None:
 
 @task
 def upload_to_s3():
-    local_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/tier_detail.csv")
+    AIRFLOW_VAR_DATA_DIR=os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    local_file_path = os.path.join(AIRFLOW_VAR_DATA_DIR, "tier_detail.csv")
     s3_hook = S3Hook(aws_conn_id='aws_default') 
     s3_bucket = 'baekjoon-data'
     s3_key = 'tier_detail/tier_detail.csv'
@@ -91,7 +93,7 @@ with DAG(
     'level_csv_to_s3',
     default_args=default_args,
     description='save level info to csv and upload to s3 DAG',
-    schedule_interval='@once',
+    schedule_interval='0 3 * * 3',
 ) as dag:
     
     save_to_csv_task = save_to_csv()

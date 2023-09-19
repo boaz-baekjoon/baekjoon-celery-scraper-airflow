@@ -116,11 +116,11 @@ def _transform(response_json):
 
 @task
 def get_page_all():
-    output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    # output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    # if not os.path.exists(output_folder):
+    #     os.makedirs(output_folder)
         
-    csv_file = os.path.join(output_folder, 'problem_detail.csv')
+    csv_file = os.path.join(os.environ.get('AIRFLOW_VAR_DATA_DIR'), 'problem_detail.csv')
     problem_ids = _get_problem_id()
     for i in range(len(problem_ids) // 100 + 1):
         start = i * 100
@@ -135,7 +135,7 @@ def get_page_all():
 
 @task
 def upload_local_file_to_s3():
-    local_file_path = os.path.join(os.getcwd(),'dags','data','problem_detail.csv')
+    local_file_path = os.path.join(os.environ.get('AIRFLOW_VAR_DATA_DIR'),'problem_detail.csv')
     s3_bucket_name = 'baekjoon-data'
     s3_file_key = 'problem_detail/problem_detail.csv'
     s3_hook = S3Hook(aws_conn_id='aws_default')
@@ -150,7 +150,7 @@ def upload_local_file_to_s3():
 with DAG(
     dag_id = 'problem_detail_to_s3',
     start_date = datetime(2023,9,1), # 날짜가 미래인 경우 실행이 안됨
-    schedule = '@once',  # 적당히 조절
+    schedule = '0 4 * * 3',  # 적당히 조절
     catchup = False,
     max_active_runs = 1,
     default_args = {

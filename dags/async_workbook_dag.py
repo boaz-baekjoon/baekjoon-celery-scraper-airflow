@@ -68,7 +68,7 @@ def upload_message()-> None:
 default_args = {
     'owner': 'airflow',
     'catchup': False,
-    'start_date': datetime(2023, 5, 20),
+    'start_date': datetime(2023, 9, 1),
     'retries': 1,
     'retry_delay': timedelta(minutes=3),
     'max_active_tasks' : 5
@@ -78,7 +78,7 @@ with DAG(
     'async_workbook_scraper',
     default_args=default_args,
     description='A async workbook scraper DAG',
-    schedule_interval='@once',
+    schedule_interval='0 3 * * 3',
 ) as dag:
     
     url = "https://www.acmicpc.net/workbook"
@@ -90,8 +90,11 @@ with DAG(
     
     s3_bucket_name = 'baekjoon-data'
     s3_folder = 'workbooks/'
-    data_folder = os.path.join(os.getcwd(), "data")
-    csv_file = os.path.join(data_folder, 'workbooks.csv')
+    
+    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    
+    # data_folder = os.path.join(os.getcwd(), "data")
+    csv_file = os.path.join(data_dir, 'workbooks.csv')
     file_name = os.path.basename(csv_file)
     s3_key = os.path.join(s3_folder, file_name)
 
