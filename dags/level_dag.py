@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import os
 import csv
 
+AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR', '/opt/airflow/data')
 
 @task
 def save_to_csv() -> None:
@@ -15,7 +16,7 @@ def save_to_csv() -> None:
     # if not os.path.exists(output_folder):
     #     os.makedirs(output_folder)
 
-    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    data_dir = AIRFLOW_VAR_DATA_DIR
     file_path = os.path.join(data_dir, "tier_detail.csv")
     
     csvfile = open(file_path, "w", newline="")
@@ -66,7 +67,7 @@ def save_to_csv() -> None:
 
 @task
 def upload_to_s3():
-    AIRFLOW_VAR_DATA_DIR=os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    
     local_file_path = os.path.join(AIRFLOW_VAR_DATA_DIR, "tier_detail.csv")
     s3_hook = S3Hook(aws_conn_id='aws_default') 
     s3_bucket = 'baekjoon-data'

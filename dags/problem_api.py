@@ -9,6 +9,7 @@ from airflow import DAG
 from airflow.decorators import task
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
+AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR', '/opt/airflow/data')
 
 # 리스트 만들기
 columns = [
@@ -69,7 +70,7 @@ columns_naming = [
 
 
 def _get_problem_id():
-    path = os.path.join(os.getcwd(),'dags','data','problems.csv')
+    path = os.path.join(AIRFLOW_VAR_DATA_DIR,'problems.csv')
     print(path)
     df = pd.read_csv(path)
     df['problem_id'] = df['problem_id'].astype(str)
@@ -120,7 +121,7 @@ def get_page_all():
     # if not os.path.exists(output_folder):
     #     os.makedirs(output_folder)
         
-    csv_file = os.path.join(os.environ.get('AIRFLOW_VAR_DATA_DIR'), 'problem_detail.csv')
+    csv_file = os.path.join(AIRFLOW_VAR_DATA_DIR, 'problem_detail.csv')
     problem_ids = _get_problem_id()
     for i in range(len(problem_ids) // 100 + 1):
         start = i * 100
@@ -135,7 +136,7 @@ def get_page_all():
 
 @task
 def upload_local_file_to_s3():
-    local_file_path = os.path.join(os.environ.get('AIRFLOW_VAR_DATA_DIR'),'problem_detail.csv')
+    local_file_path = os.path.join(AIRFLOW_VAR_DATA_DIR,'problem_detail.csv')
     s3_bucket_name = 'baekjoon-data'
     s3_file_key = 'problem_detail/problem_detail.csv'
     s3_hook = S3Hook(aws_conn_id='aws_default')

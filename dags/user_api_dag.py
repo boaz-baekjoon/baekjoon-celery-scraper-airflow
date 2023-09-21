@@ -8,6 +8,7 @@ import requests
 import pandas as pd
 import random
 
+AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR', '/opt/airflow/data')
 
 @task
 def collect_data_and_save_to_csv(delay: float) -> None:
@@ -28,8 +29,6 @@ def collect_data_and_save_to_csv(delay: float) -> None:
     querystring = {"page": 1}
     count = requests.get(url, headers=headers, params=querystring).json()['count']
     max_page = count // 50 + 1
-    
-    AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR')
     
     csv_file = os.path.join(AIRFLOW_VAR_DATA_DIR, 'users_detail.csv')
     print('start save into ', csv_file)
@@ -126,7 +125,7 @@ def collect_data_and_save_to_csv(delay: float) -> None:
 
 @task
 def upload_local_file_to_s3(aws_conn_id:str, s3_bucket_name:str) -> None:
-    AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+
     local_file_path = os.path.join(AIRFLOW_VAR_DATA_DIR, 'users_detail.csv')
     s3_file_key = 'users_detail/users_detail.csv'
     

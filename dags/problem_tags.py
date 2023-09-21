@@ -11,7 +11,7 @@ import random
 
 # Set up logging
 logger = logging.getLogger(__name__)
-
+AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR', '/opt/airflow/data')
 
 @task
 def collect_tags_and_save_to_csv(url:str) -> None:
@@ -23,7 +23,7 @@ def collect_tags_and_save_to_csv(url:str) -> None:
             ]   
     headers = {'User-Agent': random.choice(ua_list)}
     
-    output_folder = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    output_folder = AIRFLOW_VAR_DATA_DIR
 
     file_path = os.path.join(output_folder, "problem_tag.csv")
 
@@ -70,7 +70,7 @@ def collect_tags_and_save_to_csv(url:str) -> None:
 def upload_to_s3(aws_conn_id:str) -> None:
     s3_hook = S3Hook(aws_conn_id=aws_conn_id) # conn_id 입력
     bucket_name = 'baekjoon-data' #bucket name 입력
-    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    data_dir = AIRFLOW_VAR_DATA_DIR
     local_file_path = os.path.join(data_dir, "problem_tag.csv")
     s3_key = 'problem_tag/problem_tag.csv'
     

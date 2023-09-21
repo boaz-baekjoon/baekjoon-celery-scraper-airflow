@@ -14,6 +14,7 @@ import os
 import logging
 import time
 
+AIRFLOW_VAR_DATA_DIR = os.environ.get('AIRFLOW_VAR_DATA_DIR', '/opt/airflow/data')
 
 @task
 def scrape_user(url:str, start:int, end:int) -> list:
@@ -38,9 +39,7 @@ def scrape_user(url:str, start:int, end:int) -> list:
 def save_to_csv(scraper_objects:list) -> None:
     scraper = async_crawler.Scraper(flag='user')
     # scraper_objects = context['ti'].xcom_pull(key='user_scraper')
-    output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    output_folder = AIRFLOW_VAR_DATA_DIR
 
 
     file_path = os.path.join(output_folder, "bj_users.csv")
@@ -88,7 +87,7 @@ with DAG(
     s3_bucket_name = 'baekjoon-data'
     s3_folder = 'users/'
     
-    data_dir = os.environ.get('AIRFLOW_VAR_DATA_DIR')
+    data_dir = AIRFLOW_VAR_DATA_DIR
     
     # data_folder = os.path.join(os.getcwd(), "data")
     csv_file = os.path.join(data_dir, 'bj_users.csv')
