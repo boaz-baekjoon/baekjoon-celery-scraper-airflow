@@ -1,18 +1,53 @@
 # Start from the Airflow image
 FROM apache/airflow:2.6.2
 
-# Change to the root user to install packages
+# # Change to the root user to install packages
+# USER root
+
+# # Copy your requirements file into the Docker container
+# COPY requirements.txt /requirements.txt
+
+# # Ensure the directory exists and has the correct permissions
+# RUN mkdir -p /opt/airflow/data && chown -R airflow: /opt/airflow/data
+
+# # Change back to the airflow user
+# USER airflow
+
+# # Install the Python packages
+
+
+# # Install additional Python packages if provided
+# ARG _PIP_ADDITIONAL_REQUIREMENTS=""
+# RUN if [ -n "$_PIP_ADDITIONAL_REQUIREMENTS" ]; then pip install $_PIP_ADDITIONAL_REQUIREMENTS; fi
+
+
+# Use root user for setting up directories and permissions
 USER root
 
-# Copy your requirements file into the Docker container
-COPY requirements.txt /requirements.txt
+# # Ensure directories exist
+# RUN mkdir -p /opt/airflow/dags \
+#     && mkdir -p /opt/airflow/logs \
+#     && mkdir -p /opt/airflow/plugins \
+#     && mkdir -p /opt/airflow/data
 
-# Set environment variable for additional requirements
-ARG _PIP_ADDITIONAL_REQUIREMENTS
+# Copy the current directory's content to the image
+COPY . /opt/airflow/
 
-# Install the Python packages
-RUN pip install -r /requirements.txt
-RUN if [ -n "$_PIP_ADDITIONAL_REQUIREMENTS" ]; then pip install $_PIP_ADDITIONAL_REQUIREMENTS; fi
+# Change ownership for specified directories to the airflow user and group
+RUN chown -R airflow: /opt/airflow/dags \
+    && chown -R airflow: /opt/airflow/logs \
+    && chown -R airflow: /opt/airflow/plugins \
+    && chown -R airflow: /opt/airflow/data
 
-# Change back to the airflow user
+# Grant full permissions for the airflow user for specified directories
+RUN chmod -R 777 /opt/airflow/dags \
+    && chmod -R 777 /opt/airflow/logs \
+    && chmod -R 777 /opt/airflow/plugins \
+    && chmod -R 777 /opt/airflow/data
+
+RUN pip uninstall asyncio
+
+# Switch back to the airflow user for subsequent operations
 USER airflow
+
+RUN pip install -r /requirements.txt
