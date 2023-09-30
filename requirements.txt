@@ -4,6 +4,7 @@ numpy
 oauth2client 
 gspread  
 apache-airflow-providers-amazon
+apache-airflow-providers-docker
 fake-useragent
 requests
 typing_extensions

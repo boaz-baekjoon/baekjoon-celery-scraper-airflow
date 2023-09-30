@@ -15,11 +15,9 @@ FROM apache/airflow:2.6.2
 
 # # Install the Python packages
 
-
 # # Install additional Python packages if provided
 # ARG _PIP_ADDITIONAL_REQUIREMENTS=""
 # RUN if [ -n "$_PIP_ADDITIONAL_REQUIREMENTS" ]; then pip install $_PIP_ADDITIONAL_REQUIREMENTS; fi
-
 
 # Use root user for setting up directories and permissions
 USER root
@@ -29,6 +27,10 @@ USER root
 #     && mkdir -p /opt/airflow/logs \
 #     && mkdir -p /opt/airflow/plugins \
 #     && mkdir -p /opt/airflow/data
+
+RUN apt update && apt-get install sudo -y \
+    && echo 'airflow ALL=NOPASSWD: ALL' >> /etc/sudoers
+    && apt install -y inetutils-ping
 
 # Copy the current directory's content to the image
 COPY . /opt/airflow/
@@ -46,6 +48,8 @@ RUN chmod -R 777 /opt/airflow/dags \
     && chmod -R 777 /opt/airflow/data
 
 RUN pip uninstall asyncio
+
+RUN usermod -aG docker airflow
 
 # Switch back to the airflow user for subsequent operations
 USER airflow

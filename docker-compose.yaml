@@ -84,6 +84,9 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/connections:/opt/airflow/connections
     - ${AIRFLOW_PROJ_DIR:-.}/variables:/opt/airflow/variables
 
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+    
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -333,7 +336,7 @@ services:
 
 volumes:
   postgres-db-volume:
-
+  
 # networks:
 #   network_custom:
 #     driver : bridge

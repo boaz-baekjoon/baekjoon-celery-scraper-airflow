@@ -1,19 +1,20 @@
-version: '3.7'
-
+version: '3'
 services:
 
   postgres_custom:
     image: postgres:13
     environment:
       POSTGRES_USER: boaz
-      POSTGRES_PASSWORD: qwer1234!@
+      POSTGRES_PASSWORD: qwer1234!
       POSGRES_DB: baekjoon
       TZ: Asia/Seoul
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - postgres-custom-db-volume:/var/lib/postgresql/data
     restart: always
     ports:
-      - 5432:5432
+      - 5433:5432
 
 volumes:
   postgres-custom-db-volume:
