@@ -7,8 +7,10 @@ services:
       dockerfile: Dockerfile
     command: python server.py
     ports:
-      - "27000:27000"
+      - "27500:27500"
     stdin_open: true
     tty: true
     volumes:
       - .:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
