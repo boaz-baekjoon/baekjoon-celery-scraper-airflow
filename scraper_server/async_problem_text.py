@@ -74,22 +74,22 @@ class ProblemScraper:
         df.to_csv(file_name, index=False, encoding='utf-8-sig')
 
 
-if __name__ == "__main__":
-    base_url = "https://www.acmicpc.net/problem/"
-    scraper = ProblemScraper(base_url)
-
-    async def main_routine():
-        async with aiohttp.ClientSession() as session:
-            for i in range(1, 28499, 500):
-                tasks = [scraper.fetch_problem_text(p_index, session) for p_index in range(i, i + 500)]
-                await asyncio.gather(*tasks)
-                await asyncio.sleep(3)
-
-    asyncio.run(main_routine())
-
-    output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    os.makedirs(output_folder, exist_ok=True)
-
-    file_path = os.path.join(output_folder, "problems_text.csv")
-    scraper.save_to_csv(file_path)
-    print(file_path)
+# if __name__ == "__main__":
+#     base_url = "https://www.acmicpc.net/problem/"
+#     scraper = ProblemScraper(base_url)
+#
+#     async def main_routine():
+#         async with aiohttp.ClientSession() as session:
+#             for i in range(1, 28499, 500):
+#                 tasks = [scraper.fetch_problem_text(p_index, session) for p_index in range(i, i + 500)]
+#                 await asyncio.gather(*tasks)
+#                 await asyncio.sleep(3)
+#
+#     asyncio.run(main_routine())
+#
+#     output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+#     os.makedirs(output_folder, exist_ok=True)
+#
+#     file_path = os.path.join(output_folder, "problems_text.csv")
+#     scraper.save_to_csv(file_path)
+#     print(file_path)

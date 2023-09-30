@@ -1,0 +1,14 @@
+# docker-compose.yml
+version: '3'
+services:
+  scraper_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python server.py
+    ports:
+      - "27000:27000"
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
