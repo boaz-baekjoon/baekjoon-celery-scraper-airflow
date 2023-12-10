@@ -6,6 +6,10 @@ gspread
 apache-airflow-providers-amazon
 apache-airflow-providers-docker
 fake-useragent
+aiohttp
+beautifulsoup4
 requests
 typing_extensions
+scrapy
+
 

@@ -1,0 +1,13 @@
+pandas
+numpy 
+oauth2client
+fake-useragent
+aiohttp
+beautifulsoup4
+requests
+typing_extensions
+scrapy
+python-dotenv
+scrapy-splash
+
+
