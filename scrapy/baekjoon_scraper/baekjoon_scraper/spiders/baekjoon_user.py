@@ -49,7 +49,7 @@ class BaekjoonUserSpider(BaseSpider):
         proxy = random.choice(self.proxies)
         for p_index in range(1, 1200):
             url = base_url + str(p_index)
-            logger.info(url)
+            # logger.info(url)
             yield scrapy.Request(
                 url=url,
                 callback=self.parse,

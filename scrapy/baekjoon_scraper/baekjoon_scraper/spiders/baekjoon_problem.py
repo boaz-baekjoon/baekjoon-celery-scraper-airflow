@@ -10,6 +10,7 @@ import logging
 logger = logging.getLogger('baekjoon_problem')
 logger.setLevel(logging.INFO)
 
+
 class ProblemsetSpider(BaseSpider):
     '''
     scrapy startproject problemset
@@ -41,7 +42,6 @@ class ProblemsetSpider(BaseSpider):
         super(ProblemsetSpider, self).__init__(*args, **kwargs)
         self.start_time = time.time()
         logging.getLogger('scrapy.core.scraper').setLevel(logging.WARNING)
-
 
     def start_requests(self):
         first_page_url = "https://www.acmicpc.net/problemset/1"

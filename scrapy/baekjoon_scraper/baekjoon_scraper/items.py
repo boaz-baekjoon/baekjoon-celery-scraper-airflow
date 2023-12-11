@@ -27,3 +27,15 @@ class UserItem(scrapy.Item):
         super(UserItem, self).__init__(*args, **kwargs)
         self._values = OrderedDict()
 
+
+class WorkbookItem(scrapy.Item):
+    workbook_rank = scrapy.Field()
+    workbook_id = scrapy.Field()
+    user_id = scrapy.Field()
+    workbook_title = scrapy.Field()
+    problem_id = scrapy.Field()
+    problem_title = scrapy.Field()
+
+    def __init__(self, *args, **kwargs):
+        super(WorkbookItem, self).__init__(*args, **kwargs)
+        self._values = OrderedDict()

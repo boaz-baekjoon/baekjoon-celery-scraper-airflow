@@ -53,10 +53,9 @@ SPLASH_URL = 'http://localhost:8050'
 #SPIDER_MIDDLEWARES = {
 #    "baekjoon_scraper.middlewares.BaekjoonScraperSpiderMiddleware": 543,
 #}
-SPIDER_MIDDLEWARES = {
-    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
-}
-
+# SPIDER_MIDDLEWARES = {
+#     'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+# }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -64,8 +63,6 @@ DOWNLOADER_MIDDLEWARES = {
     'baekjoon_scraper.middlewares.RandomUserAgentMiddleware': 400,
     'baekjoon_scraper.middlewares.CustomProxyMiddleware': 350,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 400,
-    'scrapy_splash.SplashCookiesMiddleware': 723,
-    'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 # Enable or disable extensions
@@ -76,9 +73,10 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "baekjoon_scraper.pipelines.BaekjoonScraperPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   # "baekjoon_scraper.pipelines.BaekjoonScraperPipeline": 300,
+   "baekjoon_scraper.pipelines.RDSFullRefreshPipeline": 300
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -105,6 +103,3 @@ DOWNLOADER_MIDDLEWARES = {
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
-
-DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
-HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'

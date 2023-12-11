@@ -1,13 +1,20 @@
 import scrapy
-from baekjoon_scraper.spiders.base_spider import BaseSpider
+from selenium import webdriver
+from selenium.webdriver.common.proxy import Proxy, ProxyType
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 from baekjoon_scraper.config import config
-from scrapy_splash import SplashRequest
 
 import logging
 import random
 
 logger = logging.getLogger('check_proxy')
 logger.setLevel(logging.DEBUG)
+
 
 class CheckProxySpider(scrapy.Spider):
     name = "check_proxy"
@@ -22,21 +29,49 @@ class CheckProxySpider(scrapy.Spider):
         'RANDOMIZE_DOWNLOAD_DELAY': False
     }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.driver = None
+
+    def get_proxy(self):
+        return random.choice(self.proxies)
+
     def start_requests(self):
         logger.info("start crawl")
         url = "https://www.whatismyip.com"
-        proxy = random.choice(self.proxies)
-        yield SplashRequest(
-            url=url,
-            callback=self.parse,
-            meta={'proxy': proxy},
-            args={'wait': 2}
-        )
+
+        # Initialize Selenium WebDriver
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+
+        # Set proxy for Chrome
+        proxy_argument = f'--proxy-server={self.get_proxy()}'
+        options.add_argument(proxy_argument)
+
+        self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()),
+                                       options=options)
+
+        yield scrapy.Request(url, self.parse, meta={'proxy': self.get_proxy()})
 
     def parse(self, response):
-        # IP 정보 추출
-        ip_info = response.xpath('//*[@id="tool-what-is-my-ip"]').getall()
-        ip_info = [i.strip() for i in ip_info if i.strip()]
+        # Use Selenium to get the page
+        self.driver.get(response.url)
 
-        # 로그로 IP 정보 출력
+        # Wait for the specific element to be loaded
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.ID, 'tool-what-is-my-ip'))
+            )
+
+            # Now extract the IP information
+            ip_info_element = self.driver.find_element(By.ID, 'tool-what-is-my-ip')
+            ip_info = ip_info_element.text.strip() if ip_info_element else 'Not found'
+        except Exception as e:
+            ip_info = f'Error occurred: {str(e)}'
+
+        # Log IP information
         logger.info(f"IP Information: {ip_info}")
+
+        # Close the browser
+        self.driver.quit()
