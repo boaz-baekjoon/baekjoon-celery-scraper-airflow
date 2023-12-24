@@ -23,17 +23,17 @@ class ProblemsetSpider(BaseSpider):
         config.PROXY_SERVER_IP
     ]
     custom_settings = {
-        'LOG_LEVEL': 'DEBUG',
-        'FEEDS': {
-            'problems.csv': {
-                'format': 'csv',
-                'encoding': 'utf8',
-                'store_empty': False,
-                'fields': ['problem_id', 'problem_title', 'problem_info', 'problem_answer_num', 'problem_submit_num',
-                           'problem_answer_rate'],
-                'overwrite': True,
-            },
-        },
+        'LOG_LEVEL': 'INFO',
+        # 'FEEDS': {
+        #     'problems.csv': {
+        #         'format': 'csv',
+        #         'encoding': 'utf8',
+        #         'store_empty': False,
+        #         'fields': ['problem_id', 'problem_title', 'problem_info', 'problem_answer_num', 'problem_submit_num',
+        #                    'problem_answer_rate'],
+        #         'overwrite': True,
+        #     },
+        # },
         'DOWNLOAD_DELAY': 0,
         'RANDOMIZE_DOWNLOAD_DELAY': False
     }
@@ -59,14 +59,13 @@ class ProblemsetSpider(BaseSpider):
         for row in rows:
             cols = row.xpath('td').xpath('string(.)').getall()
             cols = [col.strip() for col in cols]
-            print(cols)
 
             item = ProblemItem()
-            item['problem_id'] = cols[0]
+            item['problem_id'] = int(cols[0])
             item['problem_title'] = cols[1]
             item['problem_info'] = cols[2]
-            item['problem_answer_num'] = cols[3]
-            item['problem_submit_num'] = cols[4]
+            item['problem_answer_num'] = int(cols[3])
+            item['problem_submit_num'] = int(cols[4])
             item['problem_answer_rate'] = float(cols[5].strip('%'))
 
             yield item

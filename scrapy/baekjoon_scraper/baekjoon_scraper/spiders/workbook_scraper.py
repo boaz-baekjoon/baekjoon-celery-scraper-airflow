@@ -11,6 +11,7 @@ import logging
 logger = logging.getLogger('workbook_scraper')
 logger.setLevel(logging.INFO)
 
+
 class WorkbookScraperSpider(BaseSpider):
     name = "workbook_scraper"
     allowed_domains = ["www.acmicpc.net"]
@@ -41,7 +42,6 @@ class WorkbookScraperSpider(BaseSpider):
         self.workbook_rank = 1
         self.proxy = config.PROXY_SERVER_IP
         logging.getLogger('scrapy.core.scraper').setLevel(logging.WARNING)
-
 
     def start_requests(self):
         for p_index in range(self.start_index, self.end_index + 1):
@@ -86,7 +86,7 @@ class WorkbookScraperSpider(BaseSpider):
 
     def parse_workbook_problems(self, response):
         workbook = response.meta['workbook']
-        self.logger.info(f"Entered parse_workbook_problems with workbook: {workbook}")
+        # self.logger.info(f"Entered parse_workbook_problems with workbook: {workbook}")
         rows = response.css('.table.table-striped.table-bordered tr')[1:]
         for row in rows:
             cols = row.xpath('td').xpath('string(.)').getall()
@@ -96,11 +96,11 @@ class WorkbookScraperSpider(BaseSpider):
             workbook["problem_title"] = cols[1]
 
             item = WorkbookItem()
-            item['workbook_rank'] = workbook["workbook_rank"]
-            item['workbook_id'] = workbook["workbook_id"]
+            item['workbook_rank'] = int(workbook["workbook_rank"])
+            item['workbook_id'] = int(workbook["workbook_id"])
             item['user_id'] = workbook["user_id"]
             item['workbook_title'] = workbook["workbook_title"]
-            item['problem_id'] = workbook["problem_id"]
+            item['problem_id'] = int(workbook["problem_id"])
             item['problem_title'] = workbook["problem_title"]
 
             # self.logger.info(f"Extracted Problem: {workbook}")

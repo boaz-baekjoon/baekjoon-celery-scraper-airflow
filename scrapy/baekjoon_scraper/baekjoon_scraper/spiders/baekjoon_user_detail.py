@@ -1,106 +1,94 @@
 import scrapy
 import json
-import os
-import random
+from baekjoon_scraper.items import UserDetailItem
 from baekjoon_scraper.config import config
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy import create_engine, Table, MetaData, select
-from sqlalchemy.orm import sessionmaker
-from baekjoon_scraper.items import ProblemDetailItem
+from scrapy.utils.response import response_status_message
+import time
+import logging
 
 
 class UserDetailSpider(scrapy.Spider):
-    name = 'baekjoon_user_detail'
+    name = 'beakjoon_user_detail'
     allowed_domains = ['solved.ac']
+    start_urls = ['https://solved.ac/api/v3/ranking/tier']
+
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
         'LOG_LEVEL': 'INFO',
-        'DOWNLOAD_DELAY': 0,
-        'RANDOMIZE_DOWNLOAD_DELAY': False
+        'RANDOMIZE_DOWNLOAD_DELAY': True,
+        'DOWNLOAD_DELAY': 3,
+        'RETRY_TIMES': 5,
+        'RETRY_HTTP_CODES': [500, 502, 503, 504, 522, 524, 408, 429]
     }
 
+    def __init__(self, *args, **kwargs):
+        super(UserDetailSpider, self).__init__(*args, **kwargs)
+        self.start_time = time.time()
+
     def start_requests(self):
-        url = 'https://solved.ac/api/v3/problem/lookup/?problemIds='
-        problem_ids = self._get_problem_id()
-        bet_url = '%2C'
-        for i in range(len(problem_ids) // 100 + 1):
-            start = i * 100
-            end = min((i + 1) * 100, len(problem_ids))
-            param = bet_url.join(problem_ids[start:end])
-            final_url = url + param
-            yield scrapy.Request(final_url,
+        for url in self.start_urls:
+            yield scrapy.Request(url,
                                  callback=self.parse,
-                                 meta={'proxy': self.get_proxy()},
+                                 meta={'proxy': self.get_proxy()}
                                  )
+
 
     def parse(self, response):
         data = json.loads(response.text)
-        for item in data:
-            transformed_data = self._transform(item)
-            for transformed_item in transformed_data:
-                # self.logger.info(transformed_item)
-                yield transformed_item
+        count = data['count']
+        max_page = count // 50 + 1
+        for page in range(1, max_page + 1):
+            next_page = f"https://solved.ac/api/v3/ranking/tier?page={page}"
+            yield scrapy.Request(next_page,
+                                 callback=self.parse_page,
+                                 meta={'proxy': self.get_proxy()})
 
-    def _get_problem_id(self):
-        # problem_ids 가져오기의 로직 구현
-        engine = self.init_db()
-        Session = sessionmaker(bind=engine)
-        session = Session()
 
-        metadata = MetaData()
-        problems_table = Table('problems', metadata, autoload_with=engine)
+    def parse_page(self, response):
+        if response.status != 200:
+            # Handle non-200 responses
+            reason = response_status_message(response.status)
+            self.retry_request(response, reason)
+            return
 
-        # problems 테이블에서 problem_id 가져오기
-        query = session.query(problems_table.c.problem_id)
-        problem_ids = [row.problem_id for row in query.all()]
-        problem_ids = list(set(problem_ids))
-        session.close()
+        data = json.loads(response.text)
+        items = data['items']
+        for item in items:
+            if item['tier'] == 5:
+                break
 
-        return problem_ids
-
-    @staticmethod
-    def init_db():
-        username = config.DB_USER
-        password = config.DB_PASSWORD
-        host = config.DB_HOST
-        port = config.DB_PORT
-        database = config.DB_NAME
-        engine = create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}')
-
-        return engine
-
-    @staticmethod
-    def _transform(item):
-        transformed_data = []
-        title_info = item.get('titles', [{}])[0]
-        tags = item.get('tags', [])
-
-        for tag in tags:
-            transformed_item = ProblemDetailItem(
-                problem_id=item.get('problemId'),
-                problem_title=item.get('titleKo'),
-                problem_lang=title_info.get('language'),
-                tag_display_lang=title_info.get('languageDisplayName'),
-                tag_name=title_info.get('title'),
-                problem_titles_isOriginal=title_info.get('isOriginal'),
-                problem_isSolvable=item.get('isSolvable'),
-                problem_isPartial=item.get('isPartial'),
-                problem_answer_num=item.get('acceptedUserCount'),
-                problem_level=item.get('level'),
-                problem_votedUserCount=item.get('votedUserCount'),
-                problem_sprout=item.get('sprout'),
-                problem_givesNoRating=item.get('givesNoRating'),
-                problem_isLevelLocked=item.get('isLevelLocked'),
-                problem_averageTries=item.get('averageTries'),
-                problem_official=item.get('official'),
-                tag_key=tag['key']
+            yield UserDetailItem(
+                user_id=item['handle'],
+                user_answer_num=item['solvedCount'],
+                user_tier=item['tier'],
+                user_rating=item['rating'],
+                user_rating_by_problems_sum=item['ratingByProblemsSum'],
+                user_rating_by_class=item['ratingByClass'],
+                user_rating_by_solved_count=item['ratingBySolvedCount'],
+                user_rating_by_vote_count=item['ratingByVoteCount'],
+                user_class=item['class'],
+                user_max_streak=item['maxStreak'],
+                user_joined_at=item['joinedAt'],
+                user_rank=item['rank'],
             )
-            transformed_data.append(transformed_item)
+            # logging.info(f"User {item['handle']} crawled")
 
-        return transformed_data
+    def retry_request(self, response, reason):
+        retry_times = response.meta.get('retry_times', 0) + 1
+        if retry_times <= self.custom_settings['RETRY_TIMES']:
+            logging.warning(f"Retrying {response.url} due to {reason} (retry {retry_times})")
+            retryreq = response.request.copy()
+            retryreq.meta['retry_times'] = retry_times
+            yield retryreq
+        else:
+            logging.error(f"Gave up retrying {response.url} after {retry_times} retries")
 
     @staticmethod
     def get_proxy():
         proxy_ip = config.PROXY_SERVER_IP
         return proxy_ip
+
+    def closed(self, reason):
+        end_time = time.time()  # Record end time
+        total_time = end_time - self.start_time
+        logging.info(f"Spider run time: {total_time:.2f} seconds")

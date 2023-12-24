@@ -16,6 +16,7 @@ webdriver-manager
 polars
 sqlalchemy
 psycopg2
-```
+asyncio
+scrapyd
 
 

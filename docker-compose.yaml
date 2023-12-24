@@ -83,6 +83,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
     - ${AIRFLOW_PROJ_DIR:-.}/connections:/opt/airflow/connections
     - ${AIRFLOW_PROJ_DIR:-.}/variables:/opt/airflow/variables
+    - ${AIRFLOW_PROJ_DIR:-.}/scrapy:/opt/airflow/scrapy
 
   extra_hosts:
     - "host.docker.internal:host-gateway"

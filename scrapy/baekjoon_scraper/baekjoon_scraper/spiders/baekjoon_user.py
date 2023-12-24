@@ -24,17 +24,17 @@ class BaekjoonUserSpider(BaseSpider):
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
         'LOG_LEVEL': 'INFO',
-        'FEEDS': {
-            'bj_users.csv': {
-                'format': 'csv',
-                'encoding': 'utf8',
-                'store_empty': False,
-                'fields': ['user_rank', 'user_id', 'status_message',
-                            'user_answer_num', 'user_submit_num',
-                            'user_answer_rate'],
-                'overwrite': True,
-            },
-        },
+        # 'FEEDS': {
+        #     'bj_users.csv': {
+        #         'format': 'csv',
+        #         'encoding': 'utf8',
+        #         'store_empty': False,
+        #         'fields': ['user_rank', 'user_id', 'status_message',
+        #                     'user_answer_num', 'user_submit_num',
+        #                     'user_answer_rate'],
+        #         'overwrite': True,
+        #     },
+        # },
         'DOWNLOAD_DELAY': 0,
         'RANDOMIZE_DOWNLOAD_DELAY': False
     }
@@ -66,11 +66,11 @@ class BaekjoonUserSpider(BaseSpider):
             cols = row.xpath('td').xpath('string(.)').getall()
 
             item = UserItem()
-            item['user_rank'] = cols[0]
+            item['user_rank'] = int(cols[0])
             item['user_id'] = cols[1]
             item['status_message'] = cols[2]
-            item['user_answer_num'] = cols[3]
-            item['user_submit_num'] = cols[4]
+            item['user_answer_num'] = int(cols[3])
+            item['user_submit_num'] = int(cols[4])
             item['user_answer_rate'] = float(cols[5].strip('%'))
             yield item
 

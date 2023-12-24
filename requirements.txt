@@ -11,5 +11,18 @@ beautifulsoup4
 requests
 typing_extensions
 scrapy
+python-dotenv
+scrapy-splash
+scrapy-redis
+scrapy-selenium
+selenium
+webdriver-manager
+polars
+sqlalchemy
+psycopg2
+asyncio
+scrapyd
+
+
 
 

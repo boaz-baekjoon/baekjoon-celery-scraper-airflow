@@ -25,8 +25,10 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
+
 DOWNLOAD_DELAY = 0
-RANDOMIZE_DOWNLOAD_DELAY = False
+AUTOTHROTTLE_ENABLED = True
+# RANDOMIZE_DOWNLOAD_DELAY = False
 
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -75,7 +77,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    # "baekjoon_scraper.pipelines.BaekjoonScraperPipeline": 300,
-   "baekjoon_scraper.pipelines.RDSFullRefreshPipeline": 300
+   "baekjoon_scraper.pipelines.RDSPipeline": 300
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
