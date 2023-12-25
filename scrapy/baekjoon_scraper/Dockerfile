@@ -41,5 +41,9 @@ COPY --from=builder /build /app
 # Set the working directory
 WORKDIR /app
 
+EXPOSE 6800
+
+RUN chmod +x run_script.sh
+
 # Run command
-CMD ["python", "crawler_process.py", "beakjoon_user_detail"]
+CMD ["run_script.sh"]

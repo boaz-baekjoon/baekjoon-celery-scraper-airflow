@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# Command to run in the container
-COMMAND="python crawler_process.py beakjoon_user_detail"
+scrapyd &
 
-# Build the Docker image
-echo "Building Docker image..."
-docker build -t baekjoon_scraper .
+# 배포 스크립트 실행
+scrapyd-deploy --project=baekjoon_scraper
 
-# Run the Docker container with the specified command
-echo "Running Docker container with command: ${COMMAND}"
-docker run -it --rm baekjoon_scraper $COMMAND
+# 컨테이너가 계속 실행되도록 대기
+wait

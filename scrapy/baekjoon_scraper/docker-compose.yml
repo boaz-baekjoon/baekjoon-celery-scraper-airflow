@@ -5,9 +5,16 @@ services:
 #    image: scrapinghub/splash
 #    ports:
 #      - "8050:8050"
-
   scrapy:
     image: baekjoon_scraper
     volumes:
       - .:/app
-    command: ["python", "crawler_process.py", "beakjoon_user_detail"]
+      - scrapy_data:/var/lib/scrapyd/
+    command: ["scrapyd"]
+    ports:
+      - "6800:6800"
+
+volumes:
+  scrapy_data:
+
+#    command: ["python", "crawler_process.py", "beakjoon_user_detail"]

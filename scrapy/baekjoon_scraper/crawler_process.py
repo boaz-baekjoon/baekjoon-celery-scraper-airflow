@@ -7,6 +7,7 @@ from baekjoon_scraper.spiders.baekjoon_user_detail import UserDetailSpider
 from baekjoon_scraper.spiders.problem_text_scraper import ProblemTextSpider
 from baekjoon_scraper.spiders.workbook_scraper import WorkbookScraperSpider
 from baekjoon_scraper.spiders.user_result_scraper import UserResultScraperSpider
+import logging
 
 
 class SpiderFactory:
@@ -27,7 +28,7 @@ class SpiderFactory:
 def run_spider(spider_name):
     spider = SpiderFactory.get_spider(spider_name)
     if spider is None:
-        print(f"Spider not found: {spider_name}")
+        logging.error(f"Spider not found: {spider_name}")
         return
 
     process = CrawlerProcess(get_project_settings())

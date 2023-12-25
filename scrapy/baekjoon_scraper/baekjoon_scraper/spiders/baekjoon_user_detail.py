@@ -32,7 +32,6 @@ class UserDetailSpider(scrapy.Spider):
                                  meta={'proxy': self.get_proxy()}
                                  )
 
-
     def parse(self, response):
         data = json.loads(response.text)
         count = data['count']
@@ -42,7 +41,6 @@ class UserDetailSpider(scrapy.Spider):
             yield scrapy.Request(next_page,
                                  callback=self.parse_page,
                                  meta={'proxy': self.get_proxy()})
-
 
     def parse_page(self, response):
         if response.status != 200:
