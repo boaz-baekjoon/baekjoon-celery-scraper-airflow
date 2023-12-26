@@ -19,9 +19,9 @@ class ProblemsetSpider(BaseSpider):
     '''
     name = "baekjoon_problem"
     allowed_domains = ["www.acmicpc.net"]
-    proxies = [
-        config.PROXY_SERVER_IP
-    ]
+    # proxies = [
+    #     config.PROXY_SERVER_IP
+    # ]
     custom_settings = {
         'LOG_LEVEL': 'INFO',
         # 'FEEDS': {
@@ -46,11 +46,12 @@ class ProblemsetSpider(BaseSpider):
     def start_requests(self):
         first_page_url = "https://www.acmicpc.net/problemset/1"
         for p_index in range(1, 290):
-            proxy = random.choice(self.proxies)
+            # proxy = random.choice(self.proxies)
             yield scrapy.Request(
                 url=first_page_url,
                 callback=self.parse,
-                meta={'proxy': proxy, 'page_number': 1},
+                # meta={'proxy': proxy, 'page_number': 1},
+                meta={'page_number': 1},
                 errback=self.handle_error
             )
 
@@ -73,11 +74,14 @@ class ProblemsetSpider(BaseSpider):
         current_page = response.meta['page_number']
         if current_page < 289:
             next_page_url = f"https://www.acmicpc.net/problemset/{current_page + 1}"
-            proxy = random.choice(self.proxies)
+            # proxy = random.choice(self.proxies)
             yield scrapy.Request(
                 url=next_page_url,
                 callback=self.parse,
-                meta={'proxy': proxy, 'page_number': current_page + 1},
+                meta={
+                    # 'proxy': proxy,
+                    'page_number': current_page + 1
+                },
                 errback=self.handle_error
             )
 

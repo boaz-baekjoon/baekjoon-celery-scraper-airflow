@@ -19,4 +19,4 @@ psycopg2
 asyncio
 scrapyd
 scrapyd-client
-
+redis

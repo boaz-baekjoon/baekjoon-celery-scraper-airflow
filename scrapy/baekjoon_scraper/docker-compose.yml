@@ -6,13 +6,26 @@ services:
 #    ports:
 #      - "8050:8050"
   scrapy:
-    image: baekjoon_scraper
+    build: .
     volumes:
       - .:/app
       - scrapy_data:/var/lib/scrapyd/
     command: ["scrapyd"]
     ports:
       - "6800:6800"
+    depends_on:
+        - scrapy-redis
+
+  scrapy-redis:
+    image: redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 20s
+      timeout: 30s
+      retries: 50
+    restart: always
 
 volumes:
   scrapy_data:

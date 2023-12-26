@@ -22,7 +22,7 @@ class ProblemTextSpider(scrapy.Spider):
     }
 
     def __init__(self, *args, **kwargs):
-        super(ProblemSpider, self).__init__(*args, **kwargs)
+        super(ProblemTextSpider, self).__init__(*args, **kwargs)
         self.start_time = time.time()
 
     def start_requests(self):
@@ -30,7 +30,7 @@ class ProblemTextSpider(scrapy.Spider):
         for index, url in enumerate(self.start_urls):
             yield scrapy.Request(url,
                                  callback=self.parse,
-                                 meta={'proxy': self.proxy},
+                                 # meta={'proxy': self.proxy},
                                  )
             if (index + 1) % 500 == 0:
                 time.sleep(3)

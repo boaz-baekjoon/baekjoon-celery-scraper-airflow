@@ -16,7 +16,12 @@ class ProxyConfig:
     PROXY_SERVER_IP = os.environ["PROXY_SERVER_IP"]
 
 
-class Config(DBConfig, ProxyConfig):
+class RedisConfig:
+    REDIS_HOST = os.environ["REDIS_HOST"]
+    REDIS_PORT = os.environ["REDIS_PORT"]
+
+
+class Config(DBConfig, ProxyConfig, RedisConfig):
     pass
 
 

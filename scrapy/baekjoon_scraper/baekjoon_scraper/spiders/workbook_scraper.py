@@ -49,7 +49,7 @@ class WorkbookScraperSpider(BaseSpider):
             yield scrapy.Request(
                 url=url,
                 callback=self.parse,
-                meta={'proxy': self.proxy},
+                # meta={'proxy': self.proxy},
                 errback=self.handle_error
             )
 
@@ -76,7 +76,7 @@ class WorkbookScraperSpider(BaseSpider):
                 yield scrapy.Request(url=problem_url,
                                      callback=self.parse_workbook_problems,
                                      meta={
-                                         'proxy': self.proxy,
+                                         # 'proxy': self.proxy,
                                          'workbook': workbook
                                      },
                                      errback=self.handle_error

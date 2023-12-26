@@ -29,7 +29,7 @@ class UserDetailSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(url,
                                  callback=self.parse,
-                                 meta={'proxy': self.get_proxy()}
+                                 # meta={'proxy': self.get_proxy()}
                                  )
 
     def parse(self, response):
@@ -40,7 +40,8 @@ class UserDetailSpider(scrapy.Spider):
             next_page = f"https://solved.ac/api/v3/ranking/tier?page={page}"
             yield scrapy.Request(next_page,
                                  callback=self.parse_page,
-                                 meta={'proxy': self.get_proxy()})
+                                 # meta={'proxy': self.get_proxy()}
+                                 )
 
     def parse_page(self, response):
         if response.status != 200:

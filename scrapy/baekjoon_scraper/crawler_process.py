@@ -6,8 +6,10 @@ from baekjoon_scraper.spiders.baekjoon_problem import ProblemsetSpider
 from baekjoon_scraper.spiders.baekjoon_user_detail import UserDetailSpider
 from baekjoon_scraper.spiders.problem_text_scraper import ProblemTextSpider
 from baekjoon_scraper.spiders.workbook_scraper import WorkbookScraperSpider
-from baekjoon_scraper.spiders.user_result_scraper import UserResultScraperSpider
+from baekjoon_scraper.spiders.user_result_pull_scraper import UserResultPullScraperSpider
+from baekjoon_scraper.spiders.user_result_push_scraper import UserResultPushScraperSpider
 import logging
+from multiprocessing import Process
 
 
 class SpiderFactory:
@@ -20,7 +22,8 @@ class SpiderFactory:
             'beakjoon_user_detail': UserDetailSpider,
             'problem_text_scraper': ProblemTextSpider,
             'workbook_scraper': WorkbookScraperSpider,
-            'user_result_scraper': UserResultScraperSpider
+            'user_result_push_scraper': UserResultPushScraperSpider,
+            'user_result_pull_scraper': UserResultPullScraperSpider
         }
         return spiders.get(spider_name, None)
 
@@ -36,12 +39,26 @@ def run_spider(spider_name):
     process.start()
 
 
+def run_spiders_in_parallel(spider_name, number_of_processes=10):
+    processes = []
+    for _ in range(number_of_processes):
+        process = Process(target=run_spider, args=(spider_name,))
+        processes.append(process)
+        process.start()
+
+    for process in processes:
+        process.join()
+
+
 if __name__ == "__main__":
     import sys
 
     spider_name = sys.argv[1]
-    if spider_name is None:
+    if not spider_name:
         print("Please specify spider name")
         sys.exit(1)
 
-    run_spider(spider_name)
+    if spider_name == 'user_result_pull_scraper':
+        run_spiders_in_parallel(spider_name)
+    else:
+        run_spider(spider_name)

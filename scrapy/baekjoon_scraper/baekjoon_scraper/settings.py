@@ -7,6 +7,7 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import os
+from baekjoon_scraper.config import config
 
 BOT_NAME = "baekjoon_scraper"
 
@@ -63,8 +64,8 @@ SPLASH_URL = 'http://localhost:8050'
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     'baekjoon_scraper.middlewares.RandomUserAgentMiddleware': 400,
-    'baekjoon_scraper.middlewares.CustomProxyMiddleware': 350,
-    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 400,
+    # 'baekjoon_scraper.middlewares.CustomProxyMiddleware': 350,
+    # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 400,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 # Enable or disable extensions
@@ -105,3 +106,15 @@ ITEM_PIPELINES = {
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+# Scrapy-Redis 설정
+# REDIS_HOST = config.REDIS_HOST  # Redis 서버 주소
+# REDIS_PORT = config.REDIS_PORT  # Redis 서버 포트
+#
+# REDIS_START_URLS_KEY = '%(name)s:start_urls'
+# # 사용할 스케줄러와 중복 필터 설정
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+#
+# # Redis에 대기열을 유지하지 않으려면 False로 설정
+# SCHEDULER_PERSIST = True

@@ -46,14 +46,14 @@ class BaekjoonUserSpider(BaseSpider):
     def start_requests(self):
         logger.info("start crawl")
         base_url = 'https://www.acmicpc.net/ranklist/'
-        proxy = random.choice(self.proxies)
+        # proxy = random.choice(self.proxies)
         for p_index in range(1, 1200):
             url = base_url + str(p_index)
             # logger.info(url)
             yield scrapy.Request(
                 url=url,
                 callback=self.parse,
-                meta={'proxy': proxy},
+                # meta={'proxy': proxy},
                 errback=self.handle_error,
                 priority=p_index
             )

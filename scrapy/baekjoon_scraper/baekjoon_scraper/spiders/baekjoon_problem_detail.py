@@ -30,7 +30,7 @@ class ProblemDetailSpider(scrapy.Spider):
             final_url = url + param
             yield scrapy.Request(final_url,
                                  callback=self.parse,
-                                 meta={'proxy': self.get_proxy()},
+                                 # meta={'proxy': self.get_proxy()},
                                  )
 
     def parse(self, response):

@@ -8,11 +8,13 @@ import json
 from sqlalchemy import create_engine, Table, MetaData, select
 from sqlalchemy.orm import sessionmaker
 from baekjoon_scraper.items import UserResultItem
+import redis
 
 
-class UserResultScraperSpider(scrapy.Spider):
-    name = 'user_result_scraper'
+class UserResultPullScraperSpider(scrapy.Spider):
+    name = 'user_result_pull_scraper'
     allowed_domains = ["www.acmicpc.net"]
+    redis_client = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=0)
 
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
@@ -26,15 +28,18 @@ class UserResultScraperSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        user_info = self._get_user_id()
-        logging.info(f"Total number of users: {len(user_info)}")
-        for user in user_info:
-            if user['user_rank'] <= 120000:
-                user_page_url = f"https://www.acmicpc.net/user/{user['user_id']}"
-                yield scrapy.Request(user_page_url, meta={
-                    'user_id': user['user_id'],
-                    'proxy': self.get_proxy()
-                })
+
+        while True:
+            user_page_url = self.redis_client.rpop('user_result_page_url')
+            if not user_page_url:
+                break
+
+            user_page_url = user_page_url.decode('utf-8')
+
+            yield scrapy.Request(user_page_url, meta={
+                'user_id': user_page_url.split('/')[-1],
+                # 'proxy': self.get_proxy()
+            })
 
     def parse(self, response):
         user_id = response.meta['user_id']
