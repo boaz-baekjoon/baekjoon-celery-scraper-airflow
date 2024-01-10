@@ -1,20 +1,30 @@
 version: '3'
 
+# docker swarm init
+# build image baekjoon-scraper-base-image
+# docker stack deploy -c docker-compose.yml baekjoon-crawler
+# docker stack rm baekjoon-crawler
 services:
-#  splash:
-#    image: scrapinghub/splash
-#    ports:
-#      - "8050:8050"
-  scrapy:
-    build: .
+
+  scraper-server:
+#    image: baekjoon-scraper-base-image:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python server.py
+    ports:
+      - "20002:20002"
+    stdin_open: true
+    tty: true
     volumes:
       - .:/app
-      - scrapy_data:/var/lib/scrapyd/
-    command: ["scrapyd"]
-    ports:
-      - "6800:6800"
+#      - scrapy-data:/var/lib/scrapyd/
+    networks:
+      - crawling-net
     depends_on:
-        - scrapy-redis
+      - scrapy-redis
+      - redis
+      - postgres-server
 
   scrapy-redis:
     image: redis
@@ -26,8 +36,96 @@ services:
       timeout: 30s
       retries: 50
     restart: always
+    networks:
+      - crawling-net
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 20s
+      timeout: 30s
+      retries: 50
+    restart: always
+    networks:
+      - crawling-net
+
+  crawl-worker:
+#    image: baekjoon-scraper-base-image:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A worker.celery_app worker --loglevel=info
+    #  --pool=eventlet
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - .:/app
+    depends_on:
+      - scrapy-redis
+      - redis
+      - scraper-server
+    networks:
+      - crawling-net
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4000M
+        reservations:
+          cpus: '0.5'
+          memory: 1000M
+
+  crawler-flower:
+#    image: baekjoon-scraper-base-image:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - 5556:5555
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - scraper-server
+      - redis
+      - crawl-worker
+    networks:
+      - crawling-net
+
+#  docker exec -it postgres-server psql -U boaz -d baekjoon -p 5431
+  postgres-server:
+    image: postgres:13
+    container_name: postgres-server
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: boaz
+      POSTGRES_PASSWORD: Boaz1234!
+      POSTGRES_DB: baekjoon
+    volumes:
+      - postgres-new-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-p", "5432", "-U", "boaz", "-d", "baekjoon" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -p 5431
+    networks:
+      - crawling-net
 
 volumes:
-  scrapy_data:
+  scrapy-data:
+  postgres-new-db-volume:
+
+networks:
+  crawling-net:
+    driver: bridge
 
 #    command: ["python", "crawler_process.py", "beakjoon_user_detail"]

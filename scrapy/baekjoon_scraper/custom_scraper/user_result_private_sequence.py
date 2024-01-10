@@ -1,9 +1,9 @@
 import random
 import concurrent.futures
-import time
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+
 
 class SubmitScraper_Concurrency:
     def __init__(self):
@@ -40,9 +40,9 @@ class SubmitScraper_Concurrency:
 
         for submits_block in submits_from_tasks:
             for submit in submits_block[1]:
-                #if submit != submits[-1][1]:
-                    index = len(submits)
-                    submits.append((index, submit))
+                # if submit != submits[-1][1]:
+                index = len(submits)
+                submits.append((index, submit))
 
         del submits[0]
 
@@ -99,9 +99,8 @@ class SubmitScraper_Concurrency:
         return submits
 
 # SubmitScraper_Concurrency 클래스의 인스턴스 생성
-ssc = SubmitScraper_Concurrency()
-result_df = ssc.gather("qkreksqkr")
+# ssc = SubmitScraper_Concurrency()
+# result_df = ssc.gather("qkreksqkr")
 
 # 변환된 데이터 프레임 출력
-#print(result_df)
-  
+# print(result_df)

@@ -9,8 +9,7 @@ from baekjoon_scraper.spiders.workbook_scraper import WorkbookScraperSpider
 from baekjoon_scraper.spiders.user_result_pull_scraper import UserResultPullScraperSpider
 from baekjoon_scraper.spiders.user_result_push_scraper import UserResultPushScraperSpider
 import logging
-from multiprocessing import Process
-
+from threading import Thread
 
 class SpiderFactory:
     @staticmethod
@@ -39,15 +38,15 @@ def run_spider(spider_name):
     process.start()
 
 
-def run_spiders_in_parallel(spider_name, number_of_processes=10):
-    processes = []
-    for _ in range(number_of_processes):
-        process = Process(target=run_spider, args=(spider_name,))
-        processes.append(process)
-        process.start()
+def run_spiders_in_parallel(spider_name, number_of_threads=10):
+    threads = []
+    for _ in range(number_of_threads):
+        thread = Thread(target=run_spider, args=(spider_name,))
+        threads.append(thread)
+        thread.start()
 
-    for process in processes:
-        process.join()
+    for thread in threads:
+        thread.join()
 
 
 if __name__ == "__main__":

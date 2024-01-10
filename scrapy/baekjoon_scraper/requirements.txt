@@ -1,3 +1,7 @@
+fastapi
+uvicorn[standard]
+gunicorn
+aiohttp
 pandas
 numpy 
 oauth2client
@@ -19,4 +23,8 @@ psycopg2
 asyncio
 scrapyd
 scrapyd-client
+celery
+flower
 redis
+pytest
+eventlet

@@ -46,4 +46,4 @@ EXPOSE 6800
 RUN chmod +x run_script.sh
 
 # Run command
-CMD ["run_script.sh"]
+#CMD ["run_script.sh"]
