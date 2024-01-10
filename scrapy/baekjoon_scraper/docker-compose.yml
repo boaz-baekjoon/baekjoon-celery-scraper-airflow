@@ -116,7 +116,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    command: postgres -p 5431
+    command: postgres -p 5432
     networks:
       - crawling-net
 

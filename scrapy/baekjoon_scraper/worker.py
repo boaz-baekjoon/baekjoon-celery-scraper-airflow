@@ -12,21 +12,17 @@ celery_app.conf.include = [
 ]
 
 
-def run_spider_in_process(spider_name):
-    def start_spider():
-        # Function to start the spider
-        run_spider(spider_name)
-
-    process = Process(target=start_spider)
-    process.start()
-    process.join()
+@celery_app.task
+def spider_task(spider_name: str):
+    run_spider(spider_name)
+    
 
 @celery_app.task
 def start_spider_task(spider_name: str):
     if spider_name == 'user_result_pull_scraper':
         run_spiders_in_parallel(spider_name)
     else:
-        run_spider_in_process(spider_name)
+        spider_task.delay(spider_name)
 
 
 @celery_app.task
