@@ -8,6 +8,7 @@ from itemadapter import ItemAdapter
 from collections import defaultdict
 from sqlalchemy import create_engine, Table, MetaData, text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import sessionmaker
 import polars as pl
 from baekjoon_scraper.config import config
@@ -104,30 +105,27 @@ class RDSPipeline:
         adapter = ItemAdapter(item)
         record = adapter.asdict()
 
-        pk_columns = self.get_primary_key_column(table_name)
-        if not pk_columns:
-            logging.error(f"No primary key column for table: {table_name}.")
-            return
+        pk_columns_list = self.get_primary_key_column(table_name).split(', ')
 
         # Convert list values to PostgreSQL array format
         for key, value in record.items():
             if isinstance(value, list):
                 record[key] = '{' + ', '.join([str(v) for v in value]) + '}'
 
-        pk_columns_list = pk_columns.split(', ')
-        placeholders = ', '.join([f':{col}' for col in record.keys()])
-        update_set = ', '.join([f"{col} = EXCLUDED.{col}" for col in record.keys()])
-
-        insert_statement = text(f"""
-            INSERT INTO {table_name} ({', '.join(record.keys())})
-            VALUES ({placeholders})
-            ON CONFLICT ({', '.join(pk_columns_list)})
-            DO UPDATE SET {update_set};
-        """)
-
         try:
             with self.engine.connect() as conn:
-                conn.execute(insert_statement, record)
+                # Construct the insert statement
+                stmt = insert(Table(table_name, MetaData(), autoload_with=self.engine)).values(record)
+                # Add the on_conflict clause
+                do_update_stmt = stmt.on_conflict_do_update(
+                    index_elements=pk_columns_list,
+                    set_={col: getattr(stmt.excluded, col) for col in record.keys()}
+                )
+                # Execute the statement
+                result = conn.execute(do_update_stmt)
+                conn.commit()
+
+                logging.info(f"{result.inserted_primary_key} pk inserted")
         except SQLAlchemyError as e:
             logging.error(f'Failed to upsert item: {str(e)}')
 
