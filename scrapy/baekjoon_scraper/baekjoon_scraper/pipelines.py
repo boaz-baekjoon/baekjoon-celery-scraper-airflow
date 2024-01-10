@@ -110,7 +110,8 @@ class RDSPipeline:
         # Convert list values to PostgreSQL array format
         for key, value in record.items():
             if isinstance(value, list):
-                record[key] = '{' + ', '.join([str(v) for v in value]) + '}'
+                # Format list as a PostgreSQL array
+                record[key] = '{' + ','.join(str(v) for v in value) + '}'
 
         try:
             with self.engine.connect() as conn:
