@@ -17,4 +17,5 @@
 # 📚 DB ERD
 
 ### Raw-Data ERD
+
 ![rawdata_erd](img/백준_ERD.jpeg)
