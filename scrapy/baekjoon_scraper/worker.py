@@ -1,6 +1,6 @@
 from celery_app.utils import create_celery
 from crawler_process import run_spider
-from custom_scraper.user_result_private_sequence import SubmitScraper_Concurrency
+from route.scraper.user_result_private_sequence import SubmitScraper_Concurrency
 from celery import group
 from multiprocessing import Process
 

@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Table, MetaData, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import sessionmaker
+from config.config import config
 
 def init_db():
     username = config.DB_USER
@@ -11,3 +12,5 @@ def init_db():
     database = config.DB_NAME
     engine = create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}')
     return engine
+
+engine = init_db()

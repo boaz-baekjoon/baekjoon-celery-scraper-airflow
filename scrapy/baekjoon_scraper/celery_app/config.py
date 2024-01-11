@@ -5,8 +5,8 @@ class BaseSettings:
     """Celery Configuration for Redis"""
 
     # Example Redis configuration, replace with your actual Redis URL and port
-    broker_url = Config.celery_broker_url
-    result_backend = Config.celery_result_backend
+    broker_url = Config.CELERY_BROKER_URL
+    result_backend = Config.CELERY_RESULT_BACKEND
 
     worker_concurrency = 10
     log_level = 'INFO'

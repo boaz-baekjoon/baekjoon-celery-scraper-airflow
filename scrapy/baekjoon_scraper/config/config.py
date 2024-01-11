@@ -4,15 +4,23 @@ from functools import lru_cache
 
 load_dotenv()
 
+class DBConfig:
+    DB_HOST = os.environ["DB_HOST"]
+    DB_PORT = os.environ["DB_PORT"]
+    DB_USER = os.environ["DB_USER"]
+    DB_PASSWORD = os.environ["DB_PASSWORD"]
+    DB_NAME = os.environ["DB_NAME"]
+
 
 class RedisConfig:
-    celery_broker_url = os.getenv("CELERY_BROKER_URL")
-    celery_result_backend = os.getenv("CELERY_RESULT_BACKEND")
+    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+    CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
     pass
 
 
 class Config(
     RedisConfig,
+    DBConfig
 ):
     pass
 
