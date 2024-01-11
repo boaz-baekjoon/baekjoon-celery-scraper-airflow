@@ -1,7 +1,9 @@
-from sqlalchemy import create_engine, Table, MetaData, text
+from sqlalchemy import create_engine, Table, MetaData, text, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.postgresql import insert
 from connection.postgre import engine
+from sqlalchemy.orm import sessionmaker
+import logging
 
 
 def upsert_user_sequence(user_id, problem_sequence, db_engine=engine) -> bool:
@@ -19,3 +21,35 @@ def upsert_user_sequence(user_id, problem_sequence, db_engine=engine) -> bool:
         conn.commit()
 
     return True
+
+
+def get_user_id(db_engine=engine):
+    """Fetches user_id and user_rank from the database."""
+    try:
+        Session = sessionmaker(bind=db_engine)
+        session = Session()
+
+        metadata = MetaData()
+        metadata.reflect(engine)
+        users_table = metadata.tables['users']
+
+        # Query the database for user_id and user_rank, sorting by user_rank
+        query = session.query(
+            users_table.c.user_id,
+            users_table.c.user_rank
+        ).order_by(users_table.c.user_rank)
+
+        user_info = [
+            {'user_id': row.user_id, 'user_rank': row.user_rank}
+            for row in query.all()
+        ]
+
+        return user_info
+
+    except Exception as e:
+        logging.error(f"Database query error: {e}")
+        return []
+
+    finally:
+        session.close()
+        engine.dispose()

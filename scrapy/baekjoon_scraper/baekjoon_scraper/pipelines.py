@@ -113,7 +113,7 @@ class RDSPipeline:
                 table = Table(table_name, MetaData(), autoload_with=self.engine)
                 stmt = insert(table).values(record)
                 returning_stmt = stmt.returning(*[table.c[col] for col in record.keys()])
-                
+
                 # Add the on_conflict clause
                 do_update_stmt = returning_stmt.on_conflict_do_update(
                     index_elements=pk_columns_list,
@@ -127,7 +127,6 @@ class RDSPipeline:
 
         except SQLAlchemyError as e:
             logging.error(f'Failed to upsert item: {str(e)}')
-
 
     def set_primary_key(self, table_name, conn):
         pk_column = self.get_primary_key_column(table_name)
@@ -164,7 +163,6 @@ class RDSPipeline:
         }
 
         return mapping.get(table_name, None)
-
 
     @staticmethod
     def init_db():

@@ -1,7 +1,9 @@
 from celery_app.utils import create_celery
 from crawler_process import run_spider
 from route.scraper.user_result_private_sequence import SubmitScraper_Concurrency
+from route.scraper.database import get_user_id
 from celery import group, chain
+import logging
 
 
 celery_app = create_celery()
@@ -49,3 +51,23 @@ def start_crawl_user_private_sequence_task(user_id: str):
     ssc = SubmitScraper_Concurrency()
     result_flag = ssc.gather(user_id)
     return result_flag
+
+
+@celery_app.task
+def start_crawl_user_private_sequence_task_all() -> int:
+    user_info = get_user_id()
+    logging.info(f"Total number of users: {len(user_info)}")
+
+    update_cnt:int = 0
+    for user in user_info:
+        if user['user_rank'] > 120000:
+            break
+        ssc = SubmitScraper_Concurrency()
+        result_flag = ssc.gather(user["user_id"])
+        if result_flag:
+            update_cnt += 1
+            logging.info(f"Successfully crawled {user['user_id']}")
+        else:
+            logging.error(f"Failed to crawl {user['user_id']}")
+
+    return update_cnt
