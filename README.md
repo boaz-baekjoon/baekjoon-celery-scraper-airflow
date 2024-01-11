@@ -18,7 +18,3 @@
 
 ### Raw-Data ERD
 ![rawdata_erd](img/백준_ERD.jpeg)
-
-
-### Data-Mart ERD (Denormalized)
-![Mart_erd](img/img.png)
