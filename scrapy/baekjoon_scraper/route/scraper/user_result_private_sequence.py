@@ -3,6 +3,7 @@ import concurrent.futures
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from route.scraper.database import upsert_user_sequence
 
 
 class SubmitScraper_Concurrency:
@@ -14,7 +15,7 @@ class SubmitScraper_Concurrency:
         ]
         self.user_id = None
 
-    def gather(self, user_id: str):
+    def gather(self, user_id: str) -> bool:
         submits_from_tasks = list()
         self.user_id = user_id
 
@@ -51,12 +52,15 @@ class SubmitScraper_Concurrency:
         df['user_id'] = user_id
         result_tuple = tuple(df['problem'])
 
-        result_df = pd.DataFrame({'user_id': [user_id], 'problem_sequence': [result_tuple]})
+        result_flag: bool = upsert_user_sequence(
+            user_id=user_id,
+            problem_sequence=result_tuple
+        )
 
-        file_name = f"{user_id}_sequence.csv"
+        # result_df = pd.DataFrame({'user_id': [user_id], 'problem_sequence': [result_tuple]})
+        # file_name = f"{user_id}_sequence.csv"
         # result_df.to_csv(file_name, index=False)
-
-        return result_df
+        return result_flag
 
     def gather_table_documents(self) -> list:
         documents = list()
@@ -97,10 +101,3 @@ class SubmitScraper_Concurrency:
             submits.append(problem)
 
         return submits
-
-# SubmitScraper_Concurrency 클래스의 인스턴스 생성
-# ssc = SubmitScraper_Concurrency()
-# result_df = ssc.gather("qkreksqkr")
-
-# 변환된 데이터 프레임 출력
-# print(result_df)

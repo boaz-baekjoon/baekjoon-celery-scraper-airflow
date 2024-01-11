@@ -11,6 +11,7 @@ from baekjoon_scraper.spiders.user_result_push_scraper import UserResultPushScra
 import logging
 from threading import Thread
 
+
 class SpiderFactory:
     @staticmethod
     def get_spider(spider_name):

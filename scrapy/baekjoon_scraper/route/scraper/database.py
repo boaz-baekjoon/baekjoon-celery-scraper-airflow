@@ -3,9 +3,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.postgresql import insert
 from connection.postgre import engine
 
-def upsert_user_sequence(engine, user_id, problem_sequence):
+
+def upsert_user_sequence(user_id, problem_sequence, db_engine=engine) -> bool:
     table_name = "user_sequence"
-    table = Table(table_name, MetaData(), autoload_with=engine)
+    table = Table(table_name, MetaData(), autoload_with=db_engine)
     stmt = insert(table).values(user_id=user_id, problem_sequence=problem_sequence)
 
     do_update_stmt = stmt.on_conflict_do_update(
@@ -13,6 +14,8 @@ def upsert_user_sequence(engine, user_id, problem_sequence):
         set_={'problem_sequence': problem_sequence}
     )
 
-    with engine.connect() as conn:
+    with db_engine.connect() as conn:
         conn.execute(do_update_stmt)
         conn.commit()
+
+    return True

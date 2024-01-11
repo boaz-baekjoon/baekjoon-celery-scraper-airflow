@@ -10,6 +10,7 @@ from worker import (
 
 crawler_router = APIRouter()
 
+
 @crawler_router.post("/start-scrapy-spider/")
 async def start_crawler(spider_name: str):
     '''
@@ -34,13 +35,13 @@ async def start_crawler(spider_name: str):
     '''
     if not spider_name:
         return {"error": "Spider name is required"}
-    
+
     if spider_name == 'user_result_push_scraper':
         result = start_spider_task.apply(args=[spider_name])
         return {
-            "message": f"finished crawling {spider_name}", 
+            "message": f"finished crawling {spider_name}",
             "task_result": result.get()
-            }
+        }
     else:
         task = start_spider_task.delay(spider_name)
         return {"message": f"Started crawling {spider_name}", "task_id": task.id}
@@ -66,3 +67,15 @@ async def crawl_crawler(user_id: str):
         "message": f"Started private sequence crawling {user_id}",
         "task_id": task.id
     }
+
+# @crawler_router.post("/crawl-user-private-sequence/")
+# async def crawl_crawler(user_id: str):
+#     if not user_id:
+#         return {"error": "user_id is required"}
+#
+#     task = start_crawl_user_private_sequence_task.delay(user_id)
+#     result = task.get(timeout=30)  # 30초 동안 태스크의 결과를 기다림
+#     return {
+#         "message": f"Completed private sequence crawling {user_id}",
+#         "result": result
+#     }
