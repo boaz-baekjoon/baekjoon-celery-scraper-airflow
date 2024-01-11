@@ -5,6 +5,7 @@ oauth2client
 gspread  
 apache-airflow-providers-amazon
 apache-airflow-providers-docker
+apache-airflow-providers-http
 fake-useragent
 aiohttp
 beautifulsoup4

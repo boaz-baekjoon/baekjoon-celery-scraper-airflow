@@ -4,7 +4,7 @@ from route.scraper.user_result_private_sequence import SubmitScraper_Concurrency
 from route.scraper.database import get_user_id
 from celery import group, chain
 import logging
-
+from typing import List
 
 celery_app = create_celery()
 
@@ -54,20 +54,42 @@ def start_crawl_user_private_sequence_task(user_id: str):
 
 
 @celery_app.task
+def scrape_and_update_user(user: dict) -> bool:
+    ssc = SubmitScraper_Concurrency()
+    result_flag = ssc.gather(user["user_id"])
+    if result_flag:
+        logging.info(f"Successfully crawled {user['user_id']}")
+    else:
+        logging.error(f"Failed to crawl {user['user_id']}")
+    return result_flag
+
+
+def split_into_sublists(lst: List, n: int) -> List[List]:
+    """Splits a list into n roughly equal sublists."""
+    k, m = divmod(len(lst), n)
+    return (lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
+
+@celery_app.task
 def start_crawl_user_private_sequence_task_all() -> int:
     user_info = get_user_id()
     logging.info(f"Total number of users: {len(user_info)}")
 
-    update_cnt:int = 0
-    for user in user_info:
-        if user['user_rank'] > 120000:
-            break
-        ssc = SubmitScraper_Concurrency()
-        result_flag = ssc.gather(user["user_id"])
-        if result_flag:
-            update_cnt += 1
-            logging.info(f"Successfully crawled {user['user_id']}")
-        else:
-            logging.error(f"Failed to crawl {user['user_id']}")
+    # Split user_info into 4 sub-lists
+    sub_lists = split_into_sublists(user_info, 4)
+
+    # Create a group of sub-tasks
+    job = group(
+        scrape_and_update_user.s(user)
+        for sublist in sub_lists
+        for user in sublist
+        if user['user_rank'] <= 120000
+    )
+
+    # Execute the group of tasks and get results
+    results = job.apply_async().get()
+
+    # Count the number of successful updates
+    update_cnt = sum(results)
 
     return update_cnt
