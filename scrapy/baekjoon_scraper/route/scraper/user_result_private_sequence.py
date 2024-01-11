@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from route.scraper.database import upsert_user_sequence
-
+import logging
 
 class SubmitScraper_Concurrency:
     def __init__(self):

@@ -47,4 +47,5 @@ def user_result_pull_scraper_task():
 @celery_app.task
 def start_crawl_user_private_sequence_task(user_id: str):
     ssc = SubmitScraper_Concurrency()
-    result_df = ssc.gather(user_id)
+    result_flag = ssc.gather(user_id)
+    return result_flag
