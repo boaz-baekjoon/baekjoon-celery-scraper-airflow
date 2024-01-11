@@ -54,7 +54,7 @@ class SubmitScraper_Concurrency:
         result_df = pd.DataFrame({'user_id': [user_id], 'problem_sequence': [result_tuple]})
 
         file_name = f"{user_id}_sequence.csv"
-        result_df.to_csv(file_name, index=False)
+        # result_df.to_csv(file_name, index=False)
 
         return result_df
 
