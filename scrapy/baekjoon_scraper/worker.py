@@ -71,7 +71,7 @@ def split_into_sublists(lst: List, n: int) -> List[List]:
 
 
 @celery_app.task
-def start_crawl_user_private_sequence_task_all() -> int:
+def start_crawl_user_private_sequence_task_all():
     user_info = get_user_id()
     logging.info(f"Total number of users: {len(user_info)}")
 
@@ -79,17 +79,22 @@ def start_crawl_user_private_sequence_task_all() -> int:
     sub_lists = split_into_sublists(user_info, 4)
 
     # Create a group of sub-tasks
-    job = group(
+    crawl_tasks = group(
         scrape_and_update_user.s(user)
         for sublist in sub_lists
         for user in sublist
         if user['user_rank'] <= 120000
     )
 
-    # Execute the group of tasks and get results
-    results = job.apply_async().get()
+    # Chain the group with a callback task
+    job = chain(crawl_tasks, process_crawl_results.s())
+    
+    # Execute the chain of tasks without waiting for the result
+    job.apply_async()
 
-    # Count the number of successful updates
-    update_cnt = sum(results)
 
+@celery_app.task
+def process_crawl_results(result_list):
+    # Process the results here
+    update_cnt = sum(result_list)
     return update_cnt

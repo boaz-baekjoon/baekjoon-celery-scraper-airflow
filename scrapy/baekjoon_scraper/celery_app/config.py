@@ -8,7 +8,7 @@ class BaseSettings:
     broker_url = Config.CELERY_BROKER_URL
     result_backend = Config.CELERY_RESULT_BACKEND
 
-    worker_concurrency = 10
+    worker_concurrency = 5
     log_level = 'INFO'
     include: list = ['tasks']
 

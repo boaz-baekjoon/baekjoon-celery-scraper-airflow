@@ -10,7 +10,7 @@ def create_celery():
     celery_app.conf.update(accept_content=["json"])
     celery_app.conf.update(task_serializer="json")
     celery_app.conf.update(result_serializer="json")
-    celery_app.conf.update(worker_prefetch_multiplier=2)
+    celery_app.conf.update(worker_prefetch_multiplier=1)
     celery_app.conf.update(broker_connection_retry_on_startup=True)
 
     return celery_app

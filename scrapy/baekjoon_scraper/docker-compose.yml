@@ -11,7 +11,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python server.py
+    command: gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app --bind 0.0.0.0:20002 --log-level info
     ports:
       - "20002:20002"
     stdin_open: true
@@ -57,7 +57,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: celery -A worker.celery_app worker --loglevel=warning --concurrency=10 -P processes
+    command: celery -A worker.celery_app worker --loglevel=warning --concurrency=5 -P processes
     #  --pool=eventlet
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0

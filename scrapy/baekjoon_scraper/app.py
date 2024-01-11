@@ -1,9 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, Response
-import logging
-from typing import Dict
 
+from route.root.views import root_router
 from route.scraper.views import crawler_router
 from worker import (
     celery_app,
@@ -11,6 +10,8 @@ from worker import (
     start_crawl_user_private_sequence_task
 )
 
+import logging
+from typing import Dict
 import time
 import json
 
@@ -57,23 +58,5 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-@app.get("/", response_class=JSONResponse, status_code=200)
-async def read_root() -> Dict[str, str]:
-    '''
-    api health check를 위한 API
-    '''
-    return {"response": "Hello World"}
-
-
-@app.get("/task-status/{task_id}")
-async def get_task_status(task_id: str):
-    task_result = celery_app.AsyncResult(task_id)
-    if not task_result.ready():
-        return {"status": "pending"}
-    return {
-        "status": "completed",
-        "result": task_result.result
-    }
-
-
+app.include_router(root_router, prefix="", tags=["root"])
 app.include_router(crawler_router, prefix="/v1/crawl", tags=["crawler"])

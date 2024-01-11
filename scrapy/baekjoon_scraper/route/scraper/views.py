@@ -31,7 +31,6 @@ async def start_crawler(spider_name: str):
 
     Returns
     -------
-
     '''
     if not spider_name:
         return {"error": "Spider name is required"}

@@ -37,7 +37,7 @@ def get_user_id(db_engine=engine):
         query = session.query(
             users_table.c.user_id,
             users_table.c.user_rank
-        ).order_by(users_table.c.user_rank)
+        ).order_by(users_table.c.user_id.desc())
 
         user_info = [
             {'user_id': row.user_id, 'user_rank': row.user_rank}
