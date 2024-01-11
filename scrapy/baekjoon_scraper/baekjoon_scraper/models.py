@@ -74,6 +74,6 @@ class UserDetailModel(BaseModel):
 
 class UserResultModel(BaseModel):
     user_id: str
-    correct_answer: Optional[List[str]]
-    answer_not_perfect: Optional[List[str]]
-    try_not_correct: Optional[List[str]]
+    correct_answer: Optional[str]
+    answer_not_perfect: Optional[str]
+    try_not_correct: Optional[str]

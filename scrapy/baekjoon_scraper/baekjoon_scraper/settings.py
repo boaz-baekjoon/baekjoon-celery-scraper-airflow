@@ -36,7 +36,7 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 16
 CONCURRENT_REQUESTS_PER_IP = 16
 
 LOG_LEVEL = 'WARNING'
-SPLASH_URL = 'http://localhost:8050'
+# SPLASH_URL = 'http://localhost:8050'
 
 
 # Disable cookies (enabled by default)

@@ -27,7 +27,7 @@ class RDSPipeline:
             'users': 'full_refresh',
             'workbooks': 'full_refresh',
             'problem_details': 'full_refresh',
-            'problem_texts': 'full_refresh',
+            'problem_texts': 'upsert',
             'user_details': 'upsert',
             'user_results': 'upsert',
         }
@@ -107,28 +107,27 @@ class RDSPipeline:
 
         pk_columns_list = self.get_primary_key_column(table_name).split(', ')
 
-        # Convert list values to PostgreSQL array format
-        for key, value in record.items():
-            if isinstance(value, list):
-                # Format list as a PostgreSQL array
-                record[key] = '{' + ','.join(str(v) for v in value) + '}'
-
         try:
             with self.engine.connect() as conn:
                 # Construct the insert statement
-                stmt = insert(Table(table_name, MetaData(), autoload_with=self.engine)).values(record)
+                table = Table(table_name, MetaData(), autoload_with=self.engine)
+                stmt = insert(table).values(record)
+                returning_stmt = stmt.returning(*[table.c[col] for col in record.keys()])
+                
                 # Add the on_conflict clause
-                do_update_stmt = stmt.on_conflict_do_update(
+                do_update_stmt = returning_stmt.on_conflict_do_update(
                     index_elements=pk_columns_list,
-                    set_={col: getattr(stmt.excluded, col) for col in record.keys()}
+                    set_={col: getattr(returning_stmt.excluded, col) for col in record.keys()}
                 )
                 # Execute the statement
-                result = conn.execute(do_update_stmt)
+                result = conn.execute(do_update_stmt).fetchone()
+                # logging.warning(f"Inserted/Updated record: {result}")
+
                 conn.commit()
 
-                logging.info(f"{result.inserted_primary_key} pk inserted")
         except SQLAlchemyError as e:
             logging.error(f'Failed to upsert item: {str(e)}')
+
 
     def set_primary_key(self, table_name, conn):
         pk_column = self.get_primary_key_column(table_name)

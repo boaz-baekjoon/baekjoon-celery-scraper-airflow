@@ -33,6 +33,7 @@ class UserResultPushScraperSpider(scrapy.Spider):
 
         for user in user_info:
             if user['user_rank'] <= 120000:
+                # if user['user_rank'] == 10 : break
                 user_page_url = f"https://www.acmicpc.net/user/{user['user_id']}"
 
                 # URL을 Redis에 저장

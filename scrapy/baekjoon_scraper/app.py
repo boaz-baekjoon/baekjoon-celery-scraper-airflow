@@ -47,9 +47,16 @@ async def start_crawler(spider_name: str):
     '''
     if not spider_name:
         return {"error": "Spider name is required"}
-
-    task = start_spider_task.delay(spider_name)
-    return {"message": f"Started crawling {spider_name}", "task_id": task.id}
+    
+    if spider_name == 'user_result_push_scraper':
+        result = start_spider_task.apply(args=[spider_name])
+        return {
+            "message": f"finished crawling {spider_name}", 
+            "task_result": result.get()
+            }
+    else:
+        task = start_spider_task.delay(spider_name)
+        return {"message": f"Started crawling {spider_name}", "task_id": task.id}
 
 
 @app.post("/crawl-user-private-sequence/")

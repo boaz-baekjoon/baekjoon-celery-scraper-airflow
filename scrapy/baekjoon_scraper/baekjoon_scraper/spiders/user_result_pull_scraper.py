@@ -18,7 +18,7 @@ class UserResultPullScraperSpider(scrapy.Spider):
 
     custom_settings = {
         'ROBOTSTXT_OBEY': False,
-        'LOG_LEVEL': 'INFO',
+        'LOG_LEVEL': 'WARNING',
         'RANDOMIZE_DOWNLOAD_DELAY': True,
         'DOWNLOAD_DELAY': 0,
         'RETRY_TIMES': 3,
@@ -43,9 +43,15 @@ class UserResultPullScraperSpider(scrapy.Spider):
 
     def parse(self, response):
         user_id = response.meta['user_id']
-        problem_table = response.css('div.panel.panel-default')
+        problem_table = response.css(
+            'div.panel.panel-default'
+            )
         ac, wa, tle = [], [], []
-        interested_titles = {'맞은 문제': ac, '맞았지만 만점을 받지 못한 문제': wa, '시도했지만 맞지 못한 문제': tle}
+        interested_titles = {
+            '맞은 문제': ac, 
+            '맞았지만 만점을 받지 못한 문제': wa, 
+            '시도했지만 맞지 못한 문제': tle
+            }
 
         for each_table in problem_table:
             table_title = each_table.css('h3::text').get()
@@ -55,8 +61,12 @@ class UserResultPullScraperSpider(scrapy.Spider):
             et = each_table.css('div.problem-list a::text').getall()
             interested_titles[table_title].extend(et)
 
+        # logging.info(f"correct_answer: {ac}")
         yield UserResultItem(
-            user_id=user_id, correct_answer=ac, answer_not_perfect=wa, try_not_correct=tle
+            user_id=user_id, 
+            correct_answer=str(ac), 
+            answer_not_perfect=str(wa), 
+            try_not_correct=str(tle)
         )
 
     def _get_user_id(self):

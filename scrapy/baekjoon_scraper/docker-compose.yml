@@ -57,7 +57,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: celery -A worker.celery_app worker --loglevel=info --concurrency=10 -P processes
+    command: celery -A worker.celery_app worker --loglevel=warning --concurrency=10 -P processes
     #  --pool=eventlet
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0

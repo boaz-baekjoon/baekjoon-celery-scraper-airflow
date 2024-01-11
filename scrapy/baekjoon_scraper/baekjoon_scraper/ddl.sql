@@ -1,10 +1,15 @@
-CREATE TABLE IF NOT EXISTS user_results (
-    user_id VARCHAR(255) NOT NULL,
-    correct_answer TEXT[],
-    answer_not_perfect TEXT[],
-    try_not_correct TEXT[],
-    PRIMARY KEY (user_id)
+create table user_results
+(
+    user_id            varchar(255) not null
+        primary key,
+    correct_answer     text,
+    answer_not_perfect text,
+    try_not_correct    text
 );
+
+create index ix_user_results_user_id
+    on user_results (user_id);
+
 
 create table user_details
 (
