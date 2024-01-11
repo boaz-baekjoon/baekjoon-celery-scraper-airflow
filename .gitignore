@@ -12,7 +12,7 @@ users.json
 *.csv
 *.icloud
 
-
+dbs/*
 # C extensions
 *.so
 
