@@ -3,3 +3,4 @@ test_
 etc/*
 dag_test/*
 
+dag_test/temp/*

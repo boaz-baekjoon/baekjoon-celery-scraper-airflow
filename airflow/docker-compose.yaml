@@ -99,28 +99,6 @@ x-airflow-common:
 
 services:
 
-  scrapy:
-    build: ./scrapy/baekjoon_scraper
-    volumes:
-      - ./scrapy/baekjoon_scraper:/app
-      - scrapy_data:/var/lib/scrapyd/
-#    command: [ "run_script.sh" ]
-    ports:
-      - "6800:6800"
-    depends_on:
-      - scrapy-redis
-
-  scrapy-redis:
-    image: redis
-    ports:
-      - "6380:6379"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 20s
-      timeout: 30s
-      retries: 50
-    restart: always
-
   postgres:
     image: postgres:13
     environment:
@@ -207,7 +185,7 @@ services:
       DUMB_INIT_SETSID: "0"
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           cpus: '1.5'
@@ -359,7 +337,6 @@ services:
 
 volumes:
   postgres-db-volume:
-  scrapy_data:
 
 # networks:
 #   network_custom:

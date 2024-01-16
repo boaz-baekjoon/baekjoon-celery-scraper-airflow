@@ -1,5 +1,5 @@
 # Stage 1: Build environment with python:3.10-slim-buster
-FROM python:3.10-slim-buster AS builder
+FROM --platform=linux/amd64 python:3.10-slim-buster AS builder
 
 # Set the working directory
 WORKDIR /build
@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Stage 2: Deploy environment with python:3.10-slim-buster
-FROM python:3.10-slim-buster AS deployer
+FROM --platform=linux/amd64 python:3.10-slim-buster AS deployer
 
 # Install only the runtime library for PostgreSQL
 RUN apt-get update && \
