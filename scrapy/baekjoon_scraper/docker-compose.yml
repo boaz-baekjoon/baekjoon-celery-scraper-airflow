@@ -7,10 +7,10 @@ version: '3'
 services:
 
   scraper-server:
-#    image: baekjoon-scraper-base-image:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: hajuny129/baekjoon-scraper-base-image:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     command: gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app --bind 0.0.0.0:20002 --log-level info
     ports:
       - "20002:20002"
@@ -53,10 +53,10 @@ services:
       - crawling-net
 
   crawl-worker:
-#    image: baekjoon-scraper-base-image:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: hajuny129/baekjoon-scraper-base-image:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     command: celery -A worker.celery_app worker --loglevel=warning --concurrency=5 -P processes
     #  --pool=eventlet
     environment:
@@ -82,10 +82,10 @@ services:
           memory: 1000M
 
   crawler-flower:
-#    image: baekjoon-scraper-base-image:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: hajuny129/baekjoon-scraper-base-image:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     command: celery --broker=redis://redis:6379/0 flower --port=5555
     ports:
       - 5555:5555
@@ -117,8 +117,10 @@ services:
       timeout: 5s
       retries: 5
     command: postgres -p 5432
+    restart: always
     networks:
       - crawling-net
+
 
 volumes:
   scrapy-data:
