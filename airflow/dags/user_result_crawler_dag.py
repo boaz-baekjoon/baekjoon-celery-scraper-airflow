@@ -35,13 +35,17 @@ with DAG(
 
     HTTP_CONN_ID = 'baekjun_scraper_api'
     spider_list = ['user_result_push_scraper', 'user_result_pull_scraper']
+    end_points = [
+        "/v1/crawl/crawl-user-result-push",
+        "/v1/crawl/start-scrapy-spider/?spider_name=user_result_pull_scraper"
+    ]
 
     last_task = start_sensor
-    for spider_name in spider_list:
+    for spider_name, end_point in zip(spider_list, end_points):
         crawler_task = CustomSimpleHttpOperator(
             task_id=f"call_crawler_{spider_name}",
             http_conn_id=HTTP_CONN_ID,
-            endpoint=f"/v1/crawl/start-scrapy-spider/?spider_name={spider_name}",
+            endpoint=end_point,
             method="POST",
             headers={"Content-Type": "application/json"},
             response_check=lambda response: handle_response(response),

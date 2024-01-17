@@ -13,6 +13,7 @@ airflow/logs/scheduler/latest
 .idea/*
 *.csv
 *.icloud
+scrapy/baekjoon_scraper/dbs/*
 
 dbs/*
 # C extensions

@@ -22,9 +22,9 @@ def handle_response(response):
 
 
 with DAG(
-        dag_id="user_sequence_crawler_dag",
-        description="user_sequence_crawler_dag by operator",
-        tags=["http", "user_sequence_crawler_dag"],
+        dag_id="user_sequence_all_crawler_dag",
+        description="all user_sequence_crawler_dag by operator",
+        tags=["http", "all", "user_sequence_crawler_dag"],
         schedule_interval="0 5 * * 1",
         start_date=days_ago(1),
         default_args=default_args,
