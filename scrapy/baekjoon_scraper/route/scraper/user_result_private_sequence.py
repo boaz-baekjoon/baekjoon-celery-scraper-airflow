@@ -100,3 +100,4 @@ class SubmitScraper_Concurrency:
             submits.append(problem)
 
         return submits
+

@@ -8,7 +8,7 @@ connections.json
 users.json
 airflow/logs/*
 airflow/dags/dag_test/*
-
+airflow/logs/scheduler/latest
 .DS_Store
 .idea/*
 *.csv

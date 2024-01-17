@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException, Query
 from starlette.responses import JSONResponse
 import logging
 from typing import Dict
+
+from route.scraper.database import get_user_info
+from connection.redis import redis_client
 from worker import (
     celery_app,
     start_spider_task,
@@ -79,6 +82,21 @@ async def crawl_sync_sequence_crawler(user_id: str):
         "message": f"Completed private sequence crawling {user_id}",
         "result": result
     }
+
+@crawler_router.post("/crawl-user-result-push")
+async def crawl_user_result_push():
+    user_info = await get_user_info()
+    if not user_info:
+        raise HTTPException(status_code=500, detail="Failed to fetch user info")
+
+    redis_client.delete('user_result_page_url')
+
+    for user in user_info:
+        if user['user_rank'] <= 120000:
+            user_page_url = f"https://www.acmicpc.net/user/{user['user_id']}"
+            redis_client.lpush('user_result_page_url', user_page_url)
+
+    return {"message": "Scraping initiated"}
 
 
 @crawler_router.post("/crawl-user-private-sequence-all/")

@@ -3,6 +3,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.dialects.postgresql import insert
 from connection.postgre import engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException
+
+import redis
+import httpx
 import logging
 
 
@@ -53,3 +58,22 @@ def get_user_id(db_engine=engine):
     finally:
         session.close()
         engine.dispose()
+
+
+async def get_user_info(async_engine=engine):
+    """Fetches user_id and user_rank from the database asynchronously."""
+    async with AsyncSession(engine) as session:
+        try:
+            metadata = MetaData()
+            await metadata.reflect(engine)
+            users_table = metadata.tables['users']
+
+            # Asynchronously query the database
+            query = select([users_table.c.user_id, users_table.c.user_rank]).order_by(users_table.c.user_rank)
+            result = await session.execute(query)
+            return [
+                {'user_id': row.user_id, 'user_rank': row.user_rank}
+                for row in result.fetchall()
+            ]
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

@@ -29,22 +29,22 @@ class SpiderFactory:
         return spiders.get(spider_name, None)
 
 
-# def run_spider(spider_name):
-#     spider = SpiderFactory.get_spider(spider_name)
-#     if spider is None:
-#         logging.error(f"Spider not found: {spider_name}")
-#         return
-#
-#     process = CrawlerProcess(get_project_settings())
-#     process.crawl(spider)
-#     process.start()
+def run_spider(spider_name):
+    spider = SpiderFactory.get_spider(spider_name)
+    if spider is None:
+        logging.error(f"Spider not found: {spider_name}")
+        return
 
-def run_spider(spider_name: str):
-    try:
-        command = ["scrapy", "crawl", spider_name]
-        subprocess.run(command, check=True)
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error running spider: {e}")
+    process = CrawlerProcess(get_project_settings())
+    process.crawl(spider)
+    process.start()
+
+# def run_spider(spider_name: str):
+#     try:
+#         command = ["scrapy", "crawl", spider_name]
+#         subprocess.run(command, check=True)
+#     except subprocess.CalledProcessError as e:
+#         logging.error(f"Error running spider: {e}")
 
 
 def run_spiders_in_parallel(spider_name, number_of_threads=10):
