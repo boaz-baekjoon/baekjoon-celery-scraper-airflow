@@ -7,11 +7,11 @@ version: '3'
 services:
 
   scraper-server:
-    image: hajuny129/baekjoon-scraper-base-image:latest
-#    build:
-#       context: .
-#       dockerfile: Dockerfile
-    command: gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app --bind 0.0.0.0:20002 --log-level info
+#    image: hajuny129/baekjoon-scraper-base-image:latest
+    build:
+       context: .
+       dockerfile: Dockerfile
+    command: python server.py
     ports:
       - "20002:20002"
     stdin_open: true
@@ -53,10 +53,10 @@ services:
       - crawling-net
 
   crawl-worker:
-    image: hajuny129/baekjoon-scraper-base-image:latest
-#    build:
-#       context: .
-#       dockerfile: Dockerfile
+#    image: hajuny129/baekjoon-scraper-base-image:latest
+    build:
+       context: .
+       dockerfile: Dockerfile
     command: celery -A worker.celery_app worker --loglevel=warning --concurrency=5 -P processes
     #  --pool=eventlet
     environment:
@@ -82,10 +82,10 @@ services:
           memory: 1000M
 
   crawler-flower:
-    image: hajuny129/baekjoon-scraper-base-image:latest
-#    build:
-#       context: .
-#       dockerfile: Dockerfile
+#    image: hajuny129/baekjoon-scraper-base-image:latest
+    build:
+       context: .
+       dockerfile: Dockerfile
     command: celery --broker=redis://redis:6379/0 flower --port=5555
     ports:
       - 5555:5555
@@ -130,3 +130,4 @@ networks:
   crawling-net:
     driver: bridge
 
+#    command: ["python", "crawler_process.py", "beakjoon_user_detail"]

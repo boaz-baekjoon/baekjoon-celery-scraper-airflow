@@ -25,7 +25,6 @@ async def start_crawler(spider_name: str):
     beakjoon_user_detail \n
     problem_text_scraper \n
     user_result_pull_scraper \n
-    user_result_push_scraper \n
     workbook_scraper \n
 
     Parameters
@@ -83,20 +82,21 @@ async def crawl_sync_sequence_crawler(user_id: str):
         "result": result
     }
 
+
 @crawler_router.post("/crawl-user-result-push")
 async def crawl_user_result_push():
-    user_info = await get_user_info()
+    user_info = get_user_info()
     if not user_info:
         raise HTTPException(status_code=500, detail="Failed to fetch user info")
 
-    redis_client.delete('user_result_page_url')
+    await redis_client.delete('user_result_page_url')
 
     for user in user_info:
         if user['user_rank'] <= 120000:
             user_page_url = f"https://www.acmicpc.net/user/{user['user_id']}"
-            redis_client.lpush('user_result_page_url', user_page_url)
+            await redis_client.lpush('user_result_page_url', user_page_url)
 
-    return {"message": "Scraping initiated"}
+    return {"message": "Saved user result page url to redis"}
 
 
 @crawler_router.post("/crawl-user-private-sequence-all/")

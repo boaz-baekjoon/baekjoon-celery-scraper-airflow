@@ -1,79 +1,54 @@
-from sqlalchemy import create_engine, Table, MetaData, text, select
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.dialects.postgresql import insert
-from connection.postgre import engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from connection.postgre import engines, RoutingSession
+from models.model import UserSequence, Users
 
-import redis
-import httpx
 import logging
 
 
-def upsert_user_sequence(user_id, problem_sequence, db_engine=engine) -> bool:
-    table_name = "user_sequence"
-    table = Table(table_name, MetaData(), autoload_with=db_engine)
-    stmt = insert(table).values(user_id=user_id, problem_sequence=problem_sequence)
-
-    do_update_stmt = stmt.on_conflict_do_update(
-        index_elements=['user_id'],  # user_id가 Primary Key라고 가정
-        set_={'problem_sequence': problem_sequence}
-    )
-
-    with db_engine.connect() as conn:
-        conn.execute(do_update_stmt)
-        conn.commit()
-
-    return True
-
-
-def get_user_id(db_engine=engine):
-    """Fetches user_id and user_rank from the database."""
+def upsert_user_sequence(user_id: str, problem_sequence: str) -> bool:
     try:
-        Session = sessionmaker(bind=db_engine)
-        session = Session()
+        db_engine = engines['baekjoon']
+        with RoutingSession(bind=db_engine) as session:
+            statement = select(UserSequence).where(UserSequence.user_id == user_id)
+            result = session.execute(statement)
+            user_sequence = result.scalars().first()
 
-        metadata = MetaData()
-        metadata.reflect(engine)
-        users_table = metadata.tables['users']
+            if user_sequence:
+                user_sequence.problem_sequence = problem_sequence
+            else:
+                new_user_sequence = UserSequence(user_id=user_id, problem_sequence=problem_sequence)
+                session.add(new_user_sequence)
 
-        # Query the database for user_id and user_rank, sorting by user_rank
-        query = session.query(
-            users_table.c.user_id,
-            users_table.c.user_rank
-        ).order_by(users_table.c.user_id.desc())
+            session.commit()
+        return True
+    except Exception as e:
+        logging.error(f"Database operation error: {e}")
+        return False
 
-        user_info = [
-            {'user_id': row.user_id, 'user_rank': row.user_rank}
-            for row in query.all()
-        ]
 
-        return user_info
+def get_user_id(db_engine=None):
+    if db_engine is None:
+        db_engine = engines['baekjoon']
 
+    try:
+        with RoutingSession(bind=db_engine) as session:
+            statement = select(Users.user_id, Users.user_rank).order_by(Users.user_id.desc())
+            result = session.execute(statement)
+            return [{'user_id': row.user_id, 'user_rank': row.user_rank} for row in result]
     except Exception as e:
         logging.error(f"Database query error: {e}")
         return []
 
-    finally:
-        session.close()
-        engine.dispose()
 
-
-async def get_user_info(async_engine=engine):
-    """Fetches user_id and user_rank from the database asynchronously."""
-    async with AsyncSession(engine) as session:
-        try:
-            metadata = MetaData()
-            await metadata.reflect(engine)
-            users_table = metadata.tables['users']
-
-            # Asynchronously query the database
-            query = select([users_table.c.user_id, users_table.c.user_rank]).order_by(users_table.c.user_rank)
-            result = await session.execute(query)
-            return [
-                {'user_id': row.user_id, 'user_rank': row.user_rank}
-                for row in result.fetchall()
-            ]
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+def get_user_info():
+    try:
+        db_engine = engines['baekjoon']
+        with RoutingSession(bind=db_engine) as session:
+            statement = select(Users.user_id, Users.user_rank).order_by(Users.user_rank)
+            result = session.execute(statement)
+            users = result.fetchall()
+            return [{'user_id': user[0], 'user_rank': user[1]} for user in users]
+    except Exception as e:
+        logging.error(f"Database query error: {e}")
+        return []

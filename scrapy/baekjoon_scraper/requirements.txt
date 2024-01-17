@@ -19,12 +19,15 @@ selenium
 webdriver-manager
 polars
 sqlalchemy
-psycopg2
+psycopg2-binary
+sqlmodel
 asyncio
 scrapyd
 scrapyd-client
 celery
 flower
 redis
+aioredis
 pytest
 eventlet
+asyncpg

@@ -6,6 +6,7 @@ import pandas as pd
 from route.scraper.database import upsert_user_sequence
 import logging
 
+
 class SubmitScraper_Concurrency:
     def __init__(self):
         self.agents_list = [
@@ -100,4 +101,3 @@ class SubmitScraper_Concurrency:
             submits.append(problem)
 
         return submits
-

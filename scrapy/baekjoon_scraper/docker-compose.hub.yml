@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+
+  scraper-server:
+    image: hajuny129/baekjoon-scraper-base-image:latest
+    build:
+       context: .
+       dockerfile: Dockerfile
+    platform: linux/amd64

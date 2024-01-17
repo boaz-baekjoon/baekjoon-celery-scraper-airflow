@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, Response
 
+from connection.redis import redis_client
 from route.root.views import root_router
 from route.scraper.views import crawler_router
 from worker import (
@@ -56,6 +57,15 @@ async def log_requests(request: Request, call_next):
     logger.info(json.dumps({"type": "performance", "duration": f"{process_time:.2f}"}))
 
     return response
+
+@app.on_event("startup")
+async def startup_event():
+    await redis_client.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await redis_client.close()
 
 
 app.include_router(root_router, prefix="", tags=["root"])
