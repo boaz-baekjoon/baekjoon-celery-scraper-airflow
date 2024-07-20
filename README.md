@@ -1,21 +1,33 @@
-# 🚀 개요
-- 백준 코딩테스트를 준비하는 사람들을 위해 문제 추천용 봇 서비스를 제공하기 위해 데이터 파이프라인를 구축했습니다. 
-- Airflow, FastApi, Celery(Worker), Redis, Postgresql를 사용하여 데이터 수집용 파이프라인을 구성. 
-- 이를 통해 모델링과 시각화를 통해 백준 인사이트를 제공할 수 있습니다.
+# 🚀 백준 코딩테스트 추천 봇 데이터 파이프라인
 
-# 📌 사용 데이터 
-| 데이터 출처 | 데이터 분류  | 데이터 설명                              | 
-|--------|---------|-------------------------------------|
- | 백준, Solved.ac   | 유저 데이터  | 백준과 Solved.ac API을 공통으로 이용하는 유저 데이터 |
-| 백준, Solved.ac | 문제 데이터  | 백준과 Solved.ac API를 통해 수집하는 문제와 문제의 메타데이터 |            
-| 백준 | 문제집 데이터 | 백준에서 삼성기출문제처럼 문제집과 문제의 ID를 담고 있는 정보 | 
+## 📊 프로젝트 개요
 
-# 🔗 데이터 파이프라인
+백준 코딩테스트를 준비하는 사람들을 위한 문제 추천 봇 서비스의 데이터 파이프라인 구축 프로젝트입니다.
 
-![data pipeline](https://i.postimg.cc/52FkbbLR/Untitled.png)
+### 🛠 사용 기술
+- Airflow
+- FastAPI
+- Celery (Worker)
+- Redis
+- PostgreSQL
 
-# 📚 DB ERD
+### 🎯 목표
+모델링과 시각화를 통해 백준 인사이트를 제공하고, 개인화된 문제 추천 서비스 구현
 
+## 🔗 프로젝트 상세 정보
+[프로젝트 정리 링크](https://www.yuki-dev-blog.site/projects/baekjoon-data-pipeline-project)
+
+## 📌 데이터 소스
+
+| 출처 | 분류 | 설명 |
+|------|------|------|
+| 백준, Solved.ac | 유저 데이터 | 공통 API를 이용한 유저 정보 |
+| 백준, Solved.ac | 문제 데이터 | 문제 및 메타데이터 |
+| 백준 | 문제집 데이터 | 문제집과 문제 ID 정보 (예: 삼성 기출문제) |
+
+## 🔄 데이터 파이프라인
+![데이터 파이프라인 구조](https://i.postimg.cc/52FkbbLR/Untitled.png)
+
+## 📚 데이터베이스 ERD
 ### Raw-Data ERD
-
-![rawdata_erd](https://i.postimg.cc/1zGCVBW0/ERD.jpg)
+![Raw 데이터 ERD](https://i.postimg.cc/1zGCVBW0/ERD.jpg)
