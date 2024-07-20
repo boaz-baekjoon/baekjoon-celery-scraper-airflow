@@ -12,10 +12,10 @@
 
 # 🔗 데이터 파이프라인
 
-![data pipeline](https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F9c4d9e71-2131-4a4b-a258-69886d03a1a8%2Fe7f6d7d6-a18e-4554-af01-3cdd16a299df%2FUntitled.png?table=block&id=851f9564-ead6-495e-83f1-8891ad096f00&spaceId=9c4d9e71-2131-4a4b-a258-69886d03a1a8&width=1810&userId=62eab6d5-74a0-4d71-841e-0418b39ef555&cache=v2)
+![data pipeline](https://i.postimg.cc/52FkbbLR/Untitled.png)
 
 # 📚 DB ERD
 
 ### Raw-Data ERD
 
-![rawdata_erd](https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F9c4d9e71-2131-4a4b-a258-69886d03a1a8%2Fe379e38f-1746-433a-8a07-f34f502c724d%2F%25E1%2584%2587%25E1%2585%25A2%25E1%2586%25A8%25E1%2584%258C%25E1%2585%25AE%25E1%2586%25AB_ERD.jpeg?table=block&id=ac2f9a36-ced4-4a6a-8dc1-1fe61ad77f7b&spaceId=9c4d9e71-2131-4a4b-a258-69886d03a1a8&width=1810&userId=62eab6d5-74a0-4d71-841e-0418b39ef555&cache=v2)
+![rawdata_erd](https://i.postimg.cc/1zGCVBW0/ERD.jpg)
